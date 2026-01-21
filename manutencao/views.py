@@ -5,7 +5,7 @@ from django.contrib.auth import login, logout
 from django.contrib import messages
 from django.utils import timezone
 from django.http import JsonResponse
-from django.db.models import Case, When, Value, IntegerField
+from django.db.models import Case, When, Value, IntegerField, Q
 from .models import Usuario, Setor, Equipamento, Chamado, ImagemChamado
 from .forms import ChamadoForm, SetorForm, EquipamentoForm
 from datetime import datetime, timedelta
@@ -122,22 +122,32 @@ def historicos(request):
     setores = Setor.objects.all()
     equipamentos = Equipamento.objects.all()
 
-    # Filtros de busca (Q = pesquisa, Setor = filtro)
-    q = request.GET.get('q')
+    q = request.GET.get('q') or ''
     setor_id = request.GET.get('setor')
 
     if q:
-        equipamentos = equipamentos.filter(nome__icontains=q)
+        equipamentos = equipamentos.filter(
+            Q(nome__icontains=q) |
+            Q(codigo__icontains=q)
+        )
+
     if setor_id:
         equipamentos = equipamentos.filter(setor_id=setor_id)
 
-    # Para cada equipamento, "anexa" o último chamado concluído
+    # Anexar último chamado concluído
     for eq in equipamentos:
-        eq.ultimo_chamado = Chamado.objects.filter(equipamento=eq, status='concluido').order_by('-concluido_em').first()
+        eq.ultimo_chamado = (
+            Chamado.objects
+            .filter(equipamento=eq, status='concluido')
+            .order_by('-concluido_em')
+            .first()
+        )
 
     return render(request, 'manutencao/historicos.html', {
         'equipamentos': equipamentos,
-        'setores': setores
+        'setores': setores,
+        'search_query': q,
+        'setor_selecionado': setor_id,
     })
 
 
