@@ -2,6 +2,7 @@
 from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import AbstractUser
+import os
 
 class Usuario(AbstractUser):
     TIPO_CHOICES = [
@@ -122,7 +123,19 @@ class Chamado(models.Model):
             return f"{horas}h {minutos}min"
         else:
             return f"{minutos}min"
-    
+        
+    def save(self, *args, **kwargs):
+        # Primeiro, salva o chamado normalmente
+        super().save(*args, **kwargs)
+        # Se o status for concluído, deletamos as imagens relacionadas
+        if self.status == 'concluido':
+            imagens = self.imagens.all() # 'imagens' é o related_name que você usou
+            for img in imagens:
+                # Deleta o arquivo físico do HD/Servidor
+                if img.imagem and os.path.isfile(img.imagem.path):
+                    os.remove(img.imagem.path)
+                # Deleta o registro no banco de dados
+                img.delete()
 
 
 class ImagemChamado(models.Model):
