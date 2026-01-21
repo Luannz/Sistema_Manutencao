@@ -1,0 +1,276 @@
+<!-- ==================== criar_chamado.html ==================== -->
+{% extends 'manutencao/base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <h3 class="mb-4">
+                    <i class="fas fa-plus-circle me-2 text-primary"></i>Novo Chamado
+                </h3>
+                
+                <form method="post" enctype="multipart/form-data" id="formChamado">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Tipo de Chamado</label>
+                        {{ form.tipo }}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Setor</label>
+                        <select id="select-setor" class="form-control">
+                            <option value="">Selecione um setor...</option>
+                            {% for setor in setores %}
+                            <option value="{{ setor.id }}">{{ setor.nome }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3" id="div-equipamento" style="display: none;">
+                        <label class="form-label fw-semibold">Equipamento</label>
+                        {{ form.equipamento }}
+                        
+                        <div id="preview-equipamento" class="mt-3" style="display: none;">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <img id="img-equipamento" src="" alt="Equipamento" 
+                                         class="img-fluid rounded" style="max-height: 200px;">
+                                    <p class="mt-2 mb-0 text-muted small">
+                                        <i class="fas fa-info-circle me-1"></i>Equipamento selecionado
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <input type="hidden" id="id_setor_avulso" name="setor_avulso">
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Descrição do Problema</label>
+                        {{ form.descricao }}
+                    </div>
+                    
+                    <div class="mb-3" id="div-imagens">
+                        <label class="form-label fw-semibold">
+                            <i class="fas fa-camera me-1"></i>Imagens do Problema (Máximo 5)
+                        </label>
+                        
+                        <div id="container-inputs-imagens">
+                            <div class="input-group mb-2 item-imagem">
+                                <input type="file" name="imagens" class="form-control" accept="image/*">
+                                <button class="btn btn-outline-danger btn-remover" type="button" style="display:none;">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <button type="button" id="btn-add-imagem" class="btn btn-outline-primary btn-sm mt-2">
+                            <i class="fas fa-plus me-1"></i>Adicionar outra imagem
+                        </button>
+                        
+                        <div id="preview-imagens" class="mt-3 row g-2"></div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Prioridade</label>
+                        {{ form.prioridade }}
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">
+                            <i class="fas fa-users me-1"></i>Mecânicos
+                        </label>
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="todos-mecanicos">
+                                    <label class="form-check-label fw-bold text-primary" for="todos-mecanicos">
+                                        Selecionar Todos
+                                    </label>
+                                </div>
+                                <hr class="my-2">
+                                {% for mecanico in mecanicos %}
+                                <div class="form-check">
+                                    <input class="form-check-input mecanico-check" type="checkbox" 
+                                           name="mecanicos" value="{{ mecanico.id }}" id="mec{{ mecanico.id }}">
+                                    <label class="form-check-label" for="mec{{ mecanico.id }}">
+                                        {{ mecanico.get_full_name|default:mecanico.username }}
+                                    </label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-paper-plane me-2"></i>Enviar Chamado
+                        </button>
+                        <a href="{% url 'solicitante_dashboard' %}" class="btn btn-outline-secondary">
+                            Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const tipoSelect = document.getElementById('id_tipo');
+    const setorSelect = document.getElementById('select-setor');
+    const equipamentoSelect = document.getElementById('id_equipamento');
+    const divEquipamento = document.getElementById('div-equipamento');
+    const divImagens = document.getElementById('div-imagens');
+    const previewEquipamento = document.getElementById('preview-equipamento');
+    const imgEquipamento = document.getElementById('img-equipamento');
+    const todosCheck = document.getElementById('todos-mecanicos');
+    const mecanicoChecks = document.querySelectorAll('.mecanico-check');
+    const setorAvulsoInput = document.getElementById('id_setor_avulso');
+
+    // --- LÓGICA DE MÚLTIPLAS IMAGENS DINÂMICAS ---
+    const maxImagens = 5;
+
+    // 1. Prepara o container interno para os inputs
+    let containerInputs = document.getElementById('container-inputs-imagens');
+    if (!containerInputs) {
+        containerInputs = document.createElement('div');
+        containerInputs.id = 'container-inputs-imagens';
+        divImagens.appendChild(containerInputs);
+    }
+
+    // 2. Prepara o botão de Adicionar
+    let btnAdd = document.getElementById('btn-add-imagem');
+    if (!btnAdd) {
+        btnAdd = document.createElement('button');
+        btnAdd.type = 'button';
+        btnAdd.id = 'btn-add-imagem';
+        btnAdd.className = 'btn btn-outline-primary btn-sm mt-2';
+        btnAdd.innerHTML = '<i class="fas fa-plus me-1"></i>Adicionar outra imagem';
+        divImagens.appendChild(btnAdd);
+    }
+
+    function atualizarInterfaceImagens() {
+        const itens = containerInputs.querySelectorAll('.item-imagem');
+        btnAdd.style.display = itens.length >= maxImagens ? 'none' : 'inline-block';
+        
+        itens.forEach(item => {
+            const btnRemover = item.querySelector('.btn-remover');
+            btnRemover.style.display = itens.length > 1 ? 'block' : 'none';
+        });
+    }
+
+    function criarNovoInputImagem() {
+        if (containerInputs.querySelectorAll('.item-imagem').length >= maxImagens) return;
+
+        const div = document.createElement('div');
+        div.className = 'item-imagem mb-3';
+        div.innerHTML = `
+            <div class="input-group">
+                <input type="file" name="imagens" class="form-control input-foto" accept="image/*">
+                <button type="button" class="btn btn-outline-danger btn-remover">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+            <div class="preview-individual mt-2" style="display:none;">
+                <img src="" class="img-thumbnail" style="height: 100px; object-fit: cover;">
+            </div>
+        `;
+
+        const input = div.querySelector('.input-foto');
+        input.addEventListener('change', function() {
+            const previewDiv = div.querySelector('.preview-individual');
+            const img = previewDiv.querySelector('img');
+            if (this.files && this.files[0]) {
+                const url = URL.createObjectURL(this.files[0]);
+                img.src = url;
+                previewDiv.style.display = 'block';
+                img.onload = () => URL.revokeObjectURL(url);
+            }
+        });
+
+        div.querySelector('.btn-remover').addEventListener('click', function() {
+            div.remove();
+            atualizarInterfaceImagens();
+        });
+
+        containerInputs.appendChild(div);
+        atualizarInterfaceImagens();
+    }
+
+    btnAdd.onclick = criarNovoInputImagem;
+
+    // Inicializa com um campo
+    if (containerInputs.querySelectorAll('.item-imagem').length === 0) {
+        criarNovoInputImagem();
+    }
+
+    // --- LÓGICA DE EXIBIÇÃO CONDICIONAL ---
+
+    function toggleCampos() {
+        const tipo = tipoSelect.value;
+        if (tipo === 'equipamento') {
+            divEquipamento.style.display = 'block';
+            divImagens.style.display = 'block';
+            setorAvulsoInput.value = '';
+            // Reativa campos para envio
+            containerInputs.querySelectorAll('input').forEach(i => i.disabled = false);
+        } else {
+            divEquipamento.style.display = 'none';
+            divImagens.style.display = 'none';
+            // Desativa campos para não travar validação
+            containerInputs.querySelectorAll('input').forEach(i => i.disabled = true);
+            setorAvulsoInput.value = setorSelect.value;
+        }
+    }
+
+    // --- AJAX E EQUIPAMENTOS ---
+
+    setorSelect.addEventListener('change', function() {
+        const setorId = this.value;
+        if (tipoSelect.value === 'avulso') setorAvulsoInput.value = setorId;
+        
+        if (!setorId || tipoSelect.value !== 'equipamento') {
+            equipamentoSelect.innerHTML = '<option value="">Selecione um equipamento...</option>';
+            return;
+        }
+        
+        fetch(`/api/equipamentos/setor/${setorId}/`)
+            .then(response => response.json())
+            .then(data => {
+                equipamentoSelect.innerHTML = '<option value="">Selecione um equipamento...</option>';
+                data.forEach(eq => {
+                    const option = document.createElement('option');
+                    option.value = eq.id;
+                    option.textContent = eq.nome;
+                    option.dataset.imagem = eq.imagem || '';
+                    equipamentoSelect.appendChild(option);
+                });
+            });
+    });
+
+    equipamentoSelect.addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        const imagemUrl = selectedOption.dataset.imagem;
+        if (imagemUrl) {
+            imgEquipamento.src = imagemUrl;
+            previewEquipamento.style.display = 'block';
+        } else {
+            previewEquipamento.style.display = 'none';
+        }
+    });
+
+    todosCheck.addEventListener('change', function() {
+        mecanicoChecks.forEach(check => check.checked = this.checked);
+    });
+
+    tipoSelect.addEventListener('change', toggleCampos);
+    toggleCampos();
+});
+</script>
+{% endblock %}

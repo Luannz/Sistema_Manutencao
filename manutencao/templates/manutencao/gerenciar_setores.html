@@ -1,0 +1,74 @@
+<!-- ==================== gerenciar_setores.html ==================== -->
+{% extends 'manutencao/base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-10 mx-auto">
+        <h2 class="mb-4"><i class="fas fa-building me-2"></i>Gerenciar Setores</h2>
+        
+        <div class="row">
+            <div class="col-md-5 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">Cadastrar Novo Setor</h5>
+                        <form method="post">
+                            {% csrf_token %}
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Nome do Setor</label>
+                                {{ form.nome }}
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Descrição</label>
+                                {{ form.descricao }}
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-plus me-2"></i>Cadastrar Setor
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-7">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">Setores Cadastrados</h5>
+                        
+                        {% if setores %}
+                        <div class="list-group">
+                            {% for setor in setores %}
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1">{{ setor.nome }}</h6>
+                                        {% if setor.descricao %}
+                                        <small class="text-muted">{{ setor.descricao }}</small>
+                                        {% endif %}
+                                        <br>
+                                        <small class="text-muted">
+                                            <i class="fas fa-cog me-1"></i>
+                                            {{ setor.equipamentos.count }} equipamento(s)
+                                        </small>
+                                    </div>
+                                    <span class="badge bg-primary">
+                                        {{ setor.criado_em|date:"d/m/Y" }}
+                                    </span>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="alert alert-info">
+                            Nenhum setor cadastrado ainda.
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

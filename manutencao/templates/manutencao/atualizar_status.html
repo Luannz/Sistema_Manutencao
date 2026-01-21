@@ -1,0 +1,147 @@
+<!-- ==================== atualizar_status.html ==================== -->
+{% extends 'manutencao/base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <h3 class="mb-4">
+                    <i class="fas fa-edit me-2 text-primary"></i>Atualizar Chamado #{{ chamado.id }}
+                </h3>
+                
+                <div class="alert alert-light border mb-4">
+                    <h5 class="mb-3">
+                        <i class="fas fa-info-circle me-2"></i>Informações do Chamado
+                    </h5>
+                    
+                    <p class="mb-2">
+                        <strong>Solicitante:</strong> {{ chamado.solicitante.username }}
+                    </p>
+                    
+                    <p class="mb-2">
+                        <strong>Criado em:</strong> {{ chamado.criado_em|date:"d/m/Y H:i" }}
+                    </p>
+                    
+                    {% if chamado.tipo == 'equipamento' %}
+                    <p class="mb-2">
+                        <strong>Equipamento:</strong> {{ chamado.equipamento.nome }}
+                    </p>
+                    <p class="mb-2">
+                        <strong>Setor:</strong> {{ chamado.equipamento.setor.nome }}
+                    </p>
+                    
+                    <!-- Imagem do Equipamento -->
+                    {% if chamado.equipamento.imagem %}
+                    <div class="my-3">
+                        <strong class="d-block mb-2">Equipamento:</strong>
+                        <img src="{{ chamado.equipamento.imagem.url }}" 
+                             alt="{{ chamado.equipamento.nome }}" 
+                             class="img-fluid rounded border" 
+                             style="max-height: 200px;">
+                    </div>
+                    {% endif %}
+                    {% else %}
+                    <p class="mb-2">
+                        <strong>Setor:</strong> {{ chamado.setor_avulso.nome }}
+                    </p>
+                    <p class="mb-2">
+                        <strong>Tipo:</strong> Manutenção Avulsa
+                    </p>
+                    {% endif %}
+                    
+                    <p class="mb-2">
+                        <strong>Descrição:</strong><br>
+                        {{ chamado.descricao }}
+                    </p>
+                    
+                    <!-- Imagens do Problema -->
+                    {% if chamado.imagens.exists %}
+                    <div class="my-3">
+                        <strong class="d-block mb-2">
+                            <i class="fas fa-images me-1"></i>Imagens do Problema:
+                        </strong>
+                        <div class="row g-2">
+                            {% for img in chamado.imagens.all %}
+                            <div class="col-6 col-md-4 col-lg-3">
+                                <a href="{{ img.imagem.url }}" target="_blank">
+                                    <img src="{{ img.imagem.url }}" 
+                                         alt="Imagem {{ forloop.counter }}" 
+                                         class="img-fluid rounded border"
+                                         style="cursor: pointer; aspect-ratio: 1; object-fit: cover;">
+                                </a>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <small class="text-muted d-block mt-2">
+                            <i class="fas fa-info-circle me-1"></i>Clique nas imagens para visualizar em tamanho real
+                        </small>
+                    </div>
+                    {% endif %}
+                    
+                    <p class="mb-0 mt-3">
+                        <strong>Status Atual:</strong> 
+                        <span class="badge {% if chamado.status == 'pendente' %}bg-warning text-dark{% elif chamado.status == 'em_progresso' %}bg-primary{% else %}bg-success{% endif %}">
+                            {{ chamado.get_status_display }}
+                        </span>
+                    </p>
+                    {% if chamado.status == 'concluido' %}
+                        <p class="small mb-1">
+                            <i class="fas fa-stopwatch me-1"></i>
+                            <strong>Ficou aberto por:</strong> {{ chamado.tempo_aberto_formatado }}
+                        </p>
+                        <p class="small mb-2">
+                            <i class="fas fa-check-circle text-success me-1"></i>
+                            Concluído em {{ chamado.concluido_em|date:"d/m/Y H:i" }}
+                        </p>
+                    {% else %}
+                        <p class="small mb-2">
+                            <i class="fas fa-hourglass-half me-1"></i>
+                            <strong>Aberto há:</strong> {{ chamado.tempo_aberto_formatado }}
+                        </p>
+                    {% endif %}
+
+                </div>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">
+                            <i class="fas fa-sync-alt me-1"></i>Novo Status
+                        </label>
+                        <select name="status" class="form-control" required>
+                            <option value="pendente" {% if chamado.status == 'pendente' %}selected{% endif %}>
+                                Pendente
+                            </option>
+                            <option value="em_progresso" {% if chamado.status == 'em_progresso' %}selected{% endif %}>
+                                Em Progresso
+                            </option>
+                            <option value="concluido" {% if chamado.status == 'concluido' %}selected{% endif %}>
+                                Concluído
+                            </option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">
+                            <i class="fas fa-comments me-1"></i>Observações do Mecânico
+                        </label>
+                        <textarea name="observacoes" class="form-control" rows="4" 
+                                  placeholder="Adicione observações sobre o atendimento...">{{ chamado.observacoes_mecanico }}</textarea>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-save me-2"></i>Salvar Alterações
+                        </button>
+                        <a href="{% url 'mecanico_dashboard' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-1"></i>Voltar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,110 @@
+<!-- ==================== gerenciar_equipamentos.html ==================== -->
+{% extends 'manutencao/base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-10 mx-auto">
+        <h2 class="mb-4">
+            <i class="fas fa-microchip me-2 text-primary"></i>Gerenciar Equipamentos
+        </h2>
+        
+        <div class="row">
+            <div class="col-md-5 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">
+                            <i class="fas fa-plus-circle me-2"></i>Cadastrar Novo Equipamento
+                        </h5>
+                        <form method="post" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Nome do Equipamento</label>
+                                {{ form.nome }}
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Setor</label>
+                                {{ form.setor }}
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Código</label>
+                                {{ form.codigo }}
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Descrição</label>
+                                {{ form.descricao }}
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">
+                                    <i class="fas fa-image me-1"></i>Imagem do Equipamento
+                                </label>
+                                {{ form.imagem }}
+                                <small class="form-text text-muted d-block mt-1">
+                                    Adicione uma imagem para facilitar a identificação
+                                </small>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-plus me-2"></i>Cadastrar Equipamento
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-7">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">
+                            <i class="fas fa-list me-2"></i>Equipamentos Cadastrados
+                        </h5>
+                        
+                        {% if equipamentos %}
+                        <div class="list-group">
+                            {% for equipamento in equipamentos %}
+                            <div class="list-group-item">
+                                <div class="row align-items-center">
+                                    {% if equipamento.imagem %}
+                                    <div class="col-auto">
+                                        <img src="{{ equipamento.imagem.url }}" 
+                                             alt="{{ equipamento.nome }}" 
+                                             class="rounded" 
+                                             style="width: 60px; height: 60px; object-fit: cover;">
+                                    </div>
+                                    {% endif %}
+                                    <div class="col">
+                                        <h6 class="mb-1">{{ equipamento.nome }}</h6>
+                                        <p class="mb-1">
+                                            <span class="badge bg-secondary">{{ equipamento.codigo }}</span>
+                                            <span class="badge bg-info">{{ equipamento.setor.nome }}</span>
+                                        </p>
+                                        {% if equipamento.descricao %}
+                                        <small class="text-muted">{{ equipamento.descricao|truncatewords:15 }}</small>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-auto">
+                                        <small class="text-muted">
+                                            {{ equipamento.criado_em|date:"d/m/Y" }}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="alert alert-info border-0">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Nenhum equipamento cadastrado ainda.
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
