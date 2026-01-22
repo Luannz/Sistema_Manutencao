@@ -145,6 +145,11 @@ def historicos(request):
         )
     if setor_id:
         equipamentos = equipamentos.filter(setor_id=setor_id)
+    
+    # limita o tanto de chamado que vai mostrar e só limita o setor se nao tiver nenhum selecionado
+    equipamentos = equipamentos[:10]
+    if not setor_id:
+        setores = setores[:10]
 
     #Anexa último chamado ao EQUIPAMENTO
     for eq in equipamentos:
