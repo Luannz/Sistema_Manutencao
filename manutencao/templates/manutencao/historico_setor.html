@@ -1,6 +1,6 @@
 {% extends 'manutencao/base.html' %}
 
-{% block title %}Histórico - {{ equipamento.nome }}{% endblock %}
+{% block title %}Histórico Infra - {{ setor.nome }}{% endblock %}
 
 {% block content %}
 <div class="container">
@@ -9,9 +9,11 @@
             <i class="fas fa-arrow-left me-1"></i> Voltar
         </a>
 
-        <h4 class="fw-bold">{{ equipamento.nome }} | {{equipamento.codigo}}</h4>
+        <h4 class="fw-bold text-dark">
+            <i class="fas fa-building me-1 text-primary"></i> Infraestrutura: {{ setor.nome }}
+        </h4>
         <p class="text-muted mb-0">
-            <i class="fas fa-industry me-1"></i> {{ equipamento.setor.nome }}
+            Exibindo todos os chamados <strong>avulsos</strong> registrados para este setor.
         </p>
     </div>
 
@@ -48,7 +50,7 @@
     </div>
     {% empty %}
         <div class="alert alert-info">
-            Este equipamento ainda não possui chamados registrados.
+            Este setor ainda não possui chamados avulsos registrados.
         </div>
     {% endfor %}
 </div>

@@ -16,7 +16,8 @@ urlpatterns = [
     path('equipamentos/', views.gerenciar_equipamentos, name='gerenciar_equipamentos'),
     path('api/equipamentos/setor/<int:setor_id>/', views.get_equipamentos_por_setor, name='get_equipamentos_por_setor'),
     path('historicos/', views.historicos, name='historicos'),
-    path('historicos/equipamento/<int:equipamento_id>/', views.historico_detalhado, name='historico_detalhado')
+    path('historicos/equipamento/<int:equipamento_id>/', views.historico_equipamento, name='historico_equipamento'),
+    path('historicos/setor/<int:setor_id>/', views.historico_setor, name='historico_setor'),
 ]
 
 if settings.DEBUG:

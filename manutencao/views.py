@@ -125,23 +125,26 @@ def historicos(request):
     q = request.GET.get('q') or ''
     setor_id = request.GET.get('setor')
 
+    # Filtro de Equipamentos
     if q:
         equipamentos = equipamentos.filter(
-            Q(nome__icontains=q) |
-            Q(codigo__icontains=q)
+            Q(nome__icontains=q) | Q(codigo__icontains=q)
         )
-
     if setor_id:
         equipamentos = equipamentos.filter(setor_id=setor_id)
 
-    # Anexar último chamado concluído
+    #Anexa último chamado ao EQUIPAMENTO
     for eq in equipamentos:
-        eq.ultimo_chamado = (
-            Chamado.objects
-            .filter(equipamento=eq, status='concluido')
-            .order_by('-concluido_em')
-            .first()
-        )
+        eq.ultimo_chamado = Chamado.objects.filter(
+            equipamento=eq, status='concluido'
+        ).order_by('-concluido_em').first()
+
+    #Anexa ultimo chamado AVULSO ao SETOR
+    #permite ver a última manutenção predial/infra do setor
+    for st in setores:
+        st.ultimo_avulso = Chamado.objects.filter(
+            setor_avulso=st, tipo='avulso', status='concluido'
+        ).order_by('-concluido_em').first()
 
     return render(request, 'manutencao/historicos.html', {
         'equipamentos': equipamentos,
@@ -152,14 +155,23 @@ def historicos(request):
 
 
 @login_required
-def historico_detalhado(request, equipamento_id):
-    # Pega o equipamento ou erro 404 se não existir
+def historico_equipamento(request, equipamento_id):
     equipamento = get_object_or_404(Equipamento, id=equipamento_id)
-    # Busca todos os chamados desse equipamento do mais novo para o mais antigo
     chamados = Chamado.objects.filter(equipamento=equipamento).order_by('-criado_em')
     
-    return render(request, 'manutencao/historico_detalhado.html', {
+    return render(request, 'manutencao/historico_equipamento.html', {
         'equipamento': equipamento,
+        'chamados': chamados
+    })
+
+@login_required
+def historico_setor(request, setor_id):
+    setor = get_object_or_404(Setor, id=setor_id)
+    # Filtra apenas chamados do tipo avulso para este setor
+    chamados = Chamado.objects.filter(setor_avulso=setor, tipo='avulso').order_by('-criado_em')
+    
+    return render(request, 'manutencao/historico_setor.html', {
+        'setor': setor,
         'chamados': chamados
     })
 

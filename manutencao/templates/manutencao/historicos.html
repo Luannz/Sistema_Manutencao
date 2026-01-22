@@ -71,7 +71,7 @@
                 </div>
 
                 <div class="mt-3">
-                    <a href="{% url 'historico_detalhado' eq.id %}" class="btn btn-outline-primary btn-sm">
+                    <a href="{% url 'historico_equipamento' eq.id %}" class="btn btn-outline-primary btn-sm">
                         <i class="fas fa-list me-1"></i> Ver histórico completo
                     </a>
                 </div>
@@ -82,6 +82,53 @@
                 Nenhum equipamento encontrado com os filtros aplicados.
             </div>
         {% endfor %}
+
+        <div class="col-md-9">
+            <h5 class="fw-bold mb-3 mt-2">
+                <i class="fas fa-building me-1 text-primary"></i> Histórico de Infraestrutura (Chamados avulsos)
+            </h5>
+
+            {% for setor in setores %}
+                {% if not search_query or setor_selecionado == setor.id|stringformat:"s" %}
+                    {% if not setor_selecionado or setor_selecionado == setor.id|stringformat:"s" %}
+                        
+                        <div class="card mb-3 chamado-card status-avulso shadow-sm">
+                            <div class="card-body" style="background-color: rgba(13, 110, 253, 0.02);">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="mb-1 fw-bold text-dark">
+                                            <i class="fas fa-building me-1 text-primary"></i> Infraestrutura: {{ setor.nome }}
+                                        </h6>
+                                        <small class="text-muted">
+                                            Manutenções Prediais / Gerais
+                                        </small>
+                                    </div>
+
+                                    <div class="text-end">
+                                        {% if setor.ultimo_avulso %}
+                                            <span class="badge bg-primary">
+                                                Último em {{ setor.ultimo_avulso.concluido_em|date:"d/m/Y" }}
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">
+                                                Sem histórico avulso
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <div class="mt-3">
+                                    <a href="{% url 'historico_setor' setor.id %}" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-search me-1"></i> Ver histórico do setor
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+        </div>
     </div>
 </div>
 {% endblock %}
