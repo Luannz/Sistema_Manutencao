@@ -155,7 +155,6 @@
                         </a>
                     </div>
                 {% endif %}
-
             </div>
         </div>
     </div>
@@ -169,4 +168,45 @@
     </div>
     {% endfor %}
 </div>
+{% if chamados.has_other_pages %}
+<nav aria-label="Navegação de páginas" class="mt-4 mb-5">
+    <ul class="pagination justify-content-center">
+        
+        {% if chamados.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ chamados.previous_page_number }}{% if status_atual %}&status={{ status_atual }}{% endif %}{% if ordem_atual %}&ordem={{ ordem_atual }}{% endif %}{% if data_atual %}&data={{ data_atual }}{% endif %}">
+                    <i class="fas fa-chevron-left"></i> Anterior
+                </a>
+            </li>
+        {% else %}
+            <li class="page-item disabled">
+                <span class="page-link"><i class="fas fa-chevron-left"></i> Anterior</span>
+            </li>
+        {% endif %}
+
+        {% for num in chamados.paginator.page_range %}
+            {% if chamados.number == num %}
+                <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+            {% elif num > chamados.number|add:'-3' and num < chamados.number|add:'3' %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ num }}{% if status_atual %}&status={{ status_atual }}{% endif %}{% if ordem_atual %}&ordem={{ ordem_atual }}{% endif %}{% if data_atual %}&data={{ data_atual }}{% endif %}">{{ num }}</a>
+                </li>
+            {% endif %}
+        {% endfor %}
+
+        {% if chamados.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ chamados.next_page_number }}{% if status_atual %}&status={{ status_atual }}{% endif %}{% if ordem_atual %}&ordem={{ ordem_atual }}{% endif %}{% if data_atual %}&data={{ data_atual }}{% endif %}">
+                    Próximo <i class="fas fa-chevron-right"></i>
+                </a>
+            </li>
+        {% else %}
+            <li class="page-item disabled">
+                <span class="page-link">Próximo <i class="fas fa-chevron-right"></i></span>
+            </li>
+        {% endif %}
+
+    </ul>
+</nav>
+{% endif %}
 {% endblock %}

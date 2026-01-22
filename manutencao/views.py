@@ -3,6 +3,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, logout
 from django.contrib import messages
+from django.core.paginator import Paginator
 from django.utils import timezone
 from django.http import JsonResponse
 from django.db.models import Case, When, Value, IntegerField, Q
@@ -42,29 +43,34 @@ def solicitante_dashboard(request):
     if request.user.tipo != 'solicitante':
         return redirect('dashboard')
     
-    chamados = Chamado.objects.filter(solicitante=request.user)
+    #Pega a lista base 
+    chamados_list = Chamado.objects.filter(solicitante=request.user)
 
-    # Filtro por status
+    #Aplica os filtros na lista completa
     status_filtro = request.GET.get('status')
     if status_filtro:
-        chamados = chamados.filter(status=status_filtro)
+        chamados_list = chamados_list.filter(status=status_filtro)
 
-    # filtro por data
     data_filtro = request.GET.get('data')
     if data_filtro == 'hoje':
-        chamados = chamados.filter(criado_em__date=datetime.today())
+        chamados_list = chamados_list.filter(criado_em__date=datetime.today())
     elif data_filtro == 'semana':
         uma_semana_atras = datetime.today() - timedelta(days=7)
-        chamados = chamados.filter(criado_em__gte=uma_semana_atras)
+        chamados_list = chamados_list.filter(criado_em__gte=uma_semana_atras)
 
-    # filtro por ordem de criacao
     ordem = request.GET.get('ordem', '-criado_em')
-    chamados = chamados.order_by(ordem)
+    chamados_list = chamados_list.order_by(ordem)
+
+    # Paginação (depois dos filtros)
+    paginator = Paginator(chamados_list, 12) # chamados por pagina
+    page_number = request.GET.get('page')
+    chamados_paginados = paginator.get_page(page_number)
 
     return render(request, 'manutencao/solicitante_dashboard.html', {
-        'chamados': chamados,
+        'chamados': chamados_paginados, 
         'status_atual': status_filtro,
         'ordem_atual': ordem,
+        'data_atual': data_filtro,
     })
 
 
@@ -73,8 +79,8 @@ def mecanico_dashboard(request):
     if request.user.tipo != 'mecanico':
         return redirect('dashboard')
     
-    # Ordenar chamados: concluídos por último
-    chamados = Chamado.objects.filter(mecanicos=request.user).annotate(
+    # lógica de filtros continua IGUAL até o final
+    chamados_list = Chamado.objects.filter(mecanicos=request.user).annotate(
         ordem_status=Case(
             When(status='pendente', then=Value(1)),
             When(status='em_progresso', then=Value(2)),
@@ -82,37 +88,44 @@ def mecanico_dashboard(request):
             default=Value(4),
             output_field=IntegerField(),
         )
-    ).order_by('ordem_status', '-criado_em')
+    )
 
-    # Filtro por status
     status_filtro = request.GET.get('status')
     if status_filtro:
-        chamados = chamados.filter(status=status_filtro)
+        chamados_list = chamados_list.filter(status=status_filtro)
 
-    # filtro por data
     data_filtro = request.GET.get('data')
     if data_filtro == 'hoje':
-        chamados = chamados.filter(criado_em__date=datetime.today())
+        chamados_list = chamados_list.filter(criado_em__date=datetime.today())
     elif data_filtro == 'semana':
         uma_semana_atras = datetime.today() - timedelta(days=7)
-        chamados = chamados.filter(criado_em__gte=uma_semana_atras)
+        chamados_list = chamados_list.filter(criado_em__gte=uma_semana_atras)
 
-    # filtro por ordem de criacao
-    ordem = request.GET.get('ordem', '-criado_em')
-    chamados = chamados.order_by(ordem)
+    ordem = request.GET.get('ordem', 'ordem_status') # ajustado para respeitar a anotação se não houver ordem
+    chamados_list = chamados_list.order_by(ordem, '-criado_em')
+
+    # 2. CALCULAR OS TOTAIS ANTES DA PAGINAÇÃO
+    pendentes = chamados_list.filter(status='pendente').count()
+    em_progresso = chamados_list.filter(status='em_progresso').count()
+    concluidos = chamados_list.filter(status='concluido').count()
+
+    # 3. APLICAR A PAGINAÇÃO
+    itens_por_pagina = 12 
+    paginator = Paginator(chamados_list, itens_por_pagina)
     
-    pendentes = chamados.filter(status='pendente').count()
-    em_progresso = chamados.filter(status='em_progresso').count()
-    concluidos = chamados.filter(status='concluido').count()
-    
+    page_number = request.GET.get('page')
+    chamados_paginados = paginator.get_page(page_number)
+
     return render(request, 'manutencao/mecanico_dashboard.html', {
-        'chamados': chamados,
+        'chamados': chamados_paginados, 
         'pendentes': pendentes,
         'em_progresso': em_progresso,
         'concluidos': concluidos,
         'status_atual': status_filtro,
-        'ordem_atual': ordem
+        'ordem_atual': ordem,
+        'data_atual': data_filtro, 
     })
+
 
 @login_required
 def historicos(request):

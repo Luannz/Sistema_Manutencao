@@ -125,11 +125,11 @@ class Chamado(models.Model):
             return f"{minutos}min"
         
     def save(self, *args, **kwargs):
-        # Primeiro, salva o chamado normalmente
+        # primeiro salva o chamado normalmente
         super().save(*args, **kwargs)
-        # Se o status for concluído, deletamos as imagens relacionadas
+        # SE o status for concluído, deletamos as imagens relacionadas
         if self.status == 'concluido':
-            imagens = self.imagens.all() # 'imagens' é o related_name que você usou
+            imagens = self.imagens.all() # 'imagens' é o related_name usado
             for img in imagens:
                 # Deleta o arquivo físico do HD/Servidor
                 if img.imagem and os.path.isfile(img.imagem.path):
