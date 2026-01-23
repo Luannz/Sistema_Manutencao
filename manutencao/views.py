@@ -286,10 +286,12 @@ def gerenciar_setores(request):
     else:
         form = SetorForm()
     
+    total_setores = Setor.objects.count()
     setores = Setor.objects.all()
     return render(request, 'manutencao/gerenciar_setores.html', {
         'form': form,
-        'setores': setores
+        'setores': setores,
+        'total_setores': total_setores
     })
 
 
@@ -307,10 +309,12 @@ def gerenciar_equipamentos(request):
     else:
         form = EquipamentoForm()
     
+    total_equipamentos = Equipamento.objects.count()
     equipamentos = Equipamento.objects.all()
     return render(request, 'manutencao/gerenciar_equipamentos.html', {
         'form': form,
-        'equipamentos': equipamentos
+        'equipamentos': equipamentos,
+        'total_equipamentos': total_equipamentos
     })
 
 

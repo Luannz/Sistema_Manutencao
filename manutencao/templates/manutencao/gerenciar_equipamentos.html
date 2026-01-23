@@ -57,8 +57,13 @@
             <div class="col-md-7">
                 <div class="card shadow-sm">
                     <div class="card-body">
-                        <h5 class="card-title mb-3">
-                            <i class="fas fa-list me-2"></i>Equipamentos Cadastrados
+                        <h5 class="card-title mb-3 d-flex justify-content-between align-items-center">
+                            <span>
+                                <i class="fas fa-list me-2"></i>Equipamentos Cadastrados
+                            </span>
+                            <span class="badge bg-secondary">
+                                {{ total_equipamentos }} Equipamentos
+                            </span>
                         </h5>
                         
                         {% if equipamentos %}

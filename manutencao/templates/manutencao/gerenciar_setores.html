@@ -35,8 +35,15 @@
             <div class="col-md-7">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title mb-3">Setores Cadastrados</h5>
-                        
+                        <h5 class="card-title mb-3 d-flex justify-content-between align-items-center">
+                            <span>
+                                <i class="fas fa-list me-2"></i>Setores Cadastrados
+                            </span>
+                            <span class="badge bg-secondary">
+                                {{ setores.count }} Setores
+                            </span>
+                        </h5>
+    
                         {% if setores %}
                         <div class="list-group">
                             {% for setor in setores %}
