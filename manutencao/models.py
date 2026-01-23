@@ -6,6 +6,8 @@ from PIL import Image
 import os
 from io import BytesIO
 from django.core.files.base import ContentFile
+from django.core.exceptions import ValidationError
+import time
 
 class Usuario(AbstractUser):
     TIPO_CHOICES = [
@@ -33,13 +35,34 @@ class Setor(models.Model):
     def __str__(self):
         return self.nome
 
+def validar_tamanho_imagem(value):
+    limit = 2 * 1024 * 1024  # 2MB
+    if value.size > limit:
+        raise ValidationError('A imagem é muito pesada. O limite é de 2MB.')
+    
+def caminho_imagem_equipamento(instance, filename):
+    # Pega a extensao original e força para minúsculo (.PNG > .png)
+    extensao = os.path.splitext(filename)[1].lower()
+    
+    # Se por algum motivo o código estiver vazio, usa o nome ou um padrão
+    # pra evita erros se o campo codigo falhar por algum motivo
+    prefixo = instance.codigo if instance.codigo else "equip"
+    
+    # Gera o tempo no caso chamado timestamp (Ex: 1705934123)
+    timestamp = int(time.time())
+    
+    # Nome final: codigo_equipamento_1705934123.png
+    novo_nome = f"{prefixo}_{timestamp}{extensao}"
+    
+    # Retorna o caminho final dentro da pasta media
+    return os.path.join('equipamentos/', novo_nome)
 
 class Equipamento(models.Model):
     nome = models.CharField(max_length=100)
     setor = models.ForeignKey(Setor, on_delete=models.CASCADE, related_name='equipamentos')
     codigo = models.CharField(max_length=50, unique=True)
     descricao = models.TextField(blank=True)
-    imagem = models.ImageField(upload_to='equipamentos/', blank=True, null=True)
+    imagem = models.ImageField(upload_to=caminho_imagem_equipamento,  validators=[validar_tamanho_imagem], blank=True, null=True, max_length=500)    
     criado_em = models.DateTimeField(auto_now_add=True)
     
     class Meta:
