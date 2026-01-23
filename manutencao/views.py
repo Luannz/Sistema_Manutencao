@@ -104,12 +104,12 @@ def mecanico_dashboard(request):
     ordem = request.GET.get('ordem', 'ordem_status') # ajustado para respeitar a anotação se não houver ordem
     chamados_list = chamados_list.order_by(ordem, '-criado_em')
 
-    # 2. CALCULAR OS TOTAIS ANTES DA PAGINAÇÃO
+    # 2. CALCULAR OS TOTAIS ANTES DA PAGINACÃO
     pendentes = chamados_list.filter(status='pendente').count()
     em_progresso = chamados_list.filter(status='em_progresso').count()
     concluidos = chamados_list.filter(status='concluido').count()
 
-    # 3. APLICAR A PAGINAÇÃO
+    # 3. APLICAR A PAGINACÃO
     itens_por_pagina = 12 
     paginator = Paginator(chamados_list, itens_por_pagina)
     

@@ -214,17 +214,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function toggleCampos() {
         const tipo = tipoSelect.value;
+        
+        // SEMPRE mostra o campo de imagens, independente do tipo
+        divImagens.style.display = 'block';
+        containerInputs.querySelectorAll('input').forEach(i => i.disabled = false);
+
         if (tipo === 'equipamento') {
             divEquipamento.style.display = 'block';
-            divImagens.style.display = 'block';
             setorAvulsoInput.value = '';
-            // Reativa campos para envio
-            containerInputs.querySelectorAll('input').forEach(i => i.disabled = false);
         } else {
+            // Se for avulso, esconde apenas o seletor de equipamento
             divEquipamento.style.display = 'none';
-            divImagens.style.display = 'none';
-            // Desativa campos para não travar validação
-            containerInputs.querySelectorAll('input').forEach(i => i.disabled = true);
+            // Vincula o setor selecionado ao input oculto do chamado avulso
             setorAvulsoInput.value = setorSelect.value;
         }
     }

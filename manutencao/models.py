@@ -2,7 +2,10 @@
 from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import AbstractUser
+from PIL import Image
 import os
+from io import BytesIO
+from django.core.files.base import ContentFile
 
 class Usuario(AbstractUser):
     TIPO_CHOICES = [
@@ -125,17 +128,46 @@ class Chamado(models.Model):
             return f"{minutos}min"
         
     def save(self, *args, **kwargs):
-        # primeiro salva o chamado normalmente
+    # salva o chamado primeiro
         super().save(*args, **kwargs)
-        # SE o status for concluído, deletamos as imagens relacionadas
+
+        # Se concluido processa as fotos para economizar espaço
         if self.status == 'concluido':
-            imagens = self.imagens.all() # 'imagens' é o related_name usado
-            for img in imagens:
-                # Deleta o arquivo físico do HD/Servidor
-                if img.imagem and os.path.isfile(img.imagem.path):
-                    os.remove(img.imagem.path)
-                # Deleta o registro no banco de dados
-                img.delete()
+            imagens = self.imagens.all()
+            
+            for img_obj in imagens:
+                if img_obj.imagem:
+                    # 1 Abrir a imagem original
+                    img_path = img_obj.imagem.path
+                    
+                    # Verifica se o arquivo existe e se ja nao é um .webp (para não processar duas vezes)
+                    if os.path.exists(img_path) and not img_path.lower().endswith('.webp'):
+                        img = Image.open(img_path)
+
+                        # 2 Redimensionar (Mantendo a proporção)
+                        # Se a foto for gigante, limita a largura máxima para 800px
+                        max_width = 800
+                        if img.width > max_width:
+                            output_size = (max_width, int((max_width / img.width) * img.height))
+                            img = img.resize(output_size, Image.LANCZOS)
+
+                        # 3 Converter para WebP em memória
+                        temp_thumb = BytesIO()
+                        img.save(temp_thumb, format='WEBP', quality=70) # Qualidade 70 
+                        temp_thumb.seek(0)
+
+                        # 4 Atualiza o arquivo no objeto
+                        # Muda a extensão do nome do arquivo
+                        nome_arquivo = os.path.splitext(os.path.basename(img_path))[0] + ".webp"
+                        
+                        # Salva o novo arquivo e deleta o antigo automaticamente
+                        img_obj.imagem.save(nome_arquivo, ContentFile(temp_thumb.read()), save=False)
+                        img_obj.save()
+                        
+                        # 5 Remove o arquivo original antigo  
+                        # mas para garantir espaço em disco imediato):
+                        if os.path.exists(img_path) and not img_path.endswith('.webp'):
+                            os.remove(img_path)
 
 
 class ImagemChamado(models.Model):

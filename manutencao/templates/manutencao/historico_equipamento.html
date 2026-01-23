@@ -38,6 +38,30 @@
                 {{ chamado.descricao }}
             </p>
 
+            <!-- Imagens do Problema -->
+            {% if chamado.imagens.exists %}
+            <div class="my-3">
+                <strong class="d-block mb-2">
+                    <i class="fas fa-images me-1"></i>Imagens do Problema:
+                </strong>
+                <div class="row g-2">
+                    {% for img in chamado.imagens.all %}
+                    <div class="col-6 col-md-4 col-lg-3">
+                        <a href="{{ img.imagem.url }}" target="_blank">
+                            <img src="{{ img.imagem.url }}" 
+                                    alt="Imagem {{ forloop.counter }}" 
+                                    class="img-fluid rounded border"
+                                    style="cursor: pointer; aspect-ratio: 1; object-fit: cover;">
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+                <small class="text-muted d-block mt-2">
+                    <i class="fas fa-info-circle me-1"></i>Clique nas imagens para visualizar em tamanho real
+                </small>
+            </div>
+            {% endif %}
+
             {% if chamado.observacoes_mecanico %}
             <div class="alert alert-light mt-3 obs-{{ chamado.status }}">
                 <strong>Mecânico:</strong><br>
