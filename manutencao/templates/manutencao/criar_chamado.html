@@ -58,50 +58,16 @@
                         </label>
                         
                         <div id="container-inputs-imagens">
-                            <div class="input-group mb-2 item-imagem">
-                                <input type="file" name="imagens" class="form-control" accept="image/*">
-                                <button class="btn btn-outline-danger btn-remover" type="button" style="display:none;">
-                                    <i class="fas fa-trash"></i>
-                                </button>
                             </div>
-                        </div>
 
                         <button type="button" id="btn-add-imagem" class="btn btn-outline-primary btn-sm mt-2">
                             <i class="fas fa-plus me-1"></i>Adicionar outra imagem
                         </button>
-                        
-                        <div id="preview-imagens" class="mt-3 row g-2"></div>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Prioridade</label>
-                        {{ form.prioridade }}
                     </div>
                     
                     <div class="mb-4">
-                        <label class="form-label fw-semibold">
-                            <i class="fas fa-users me-1"></i>Mecânicos
-                        </label>
-                        <div class="card bg-light">
-                            <div class="card-body">
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" id="todos-mecanicos">
-                                    <label class="form-check-label fw-bold text-primary" for="todos-mecanicos">
-                                        Selecionar Todos
-                                    </label>
-                                </div>
-                                <hr class="my-2">
-                                {% for mecanico in mecanicos %}
-                                <div class="form-check">
-                                    <input class="form-check-input mecanico-check" type="checkbox" 
-                                           name="mecanicos" value="{{ mecanico.id }}" id="mec{{ mecanico.id }}">
-                                    <label class="form-check-label" for="mec{{ mecanico.id }}">
-                                        {{ mecanico.get_full_name|default:mecanico.username }}
-                                    </label>
-                                </div>
-                                {% endfor %}
-                            </div>
-                        </div>
+                        <label class="form-label fw-semibold">Prioridade</label>
+                        {{ form.prioridade }}
                     </div>
                     
                     <div class="d-grid gap-2">
@@ -129,36 +95,16 @@ document.addEventListener('DOMContentLoaded', function() {
     const divImagens = document.getElementById('div-imagens');
     const previewEquipamento = document.getElementById('preview-equipamento');
     const imgEquipamento = document.getElementById('img-equipamento');
-    const todosCheck = document.getElementById('todos-mecanicos');
-    const mecanicoChecks = document.querySelectorAll('.mecanico-check');
     const setorAvulsoInput = document.getElementById('id_setor_avulso');
 
     // --- LÓGICA DE MÚLTIPLAS IMAGENS DINÂMICAS ---
     const maxImagens = 5;
-
-    // 1. Prepara o container interno para os inputs
     let containerInputs = document.getElementById('container-inputs-imagens');
-    if (!containerInputs) {
-        containerInputs = document.createElement('div');
-        containerInputs.id = 'container-inputs-imagens';
-        divImagens.appendChild(containerInputs);
-    }
-
-    // 2. Prepara o botão de Adicionar
     let btnAdd = document.getElementById('btn-add-imagem');
-    if (!btnAdd) {
-        btnAdd = document.createElement('button');
-        btnAdd.type = 'button';
-        btnAdd.id = 'btn-add-imagem';
-        btnAdd.className = 'btn btn-outline-primary btn-sm mt-2';
-        btnAdd.innerHTML = '<i class="fas fa-plus me-1"></i>Adicionar outra imagem';
-        divImagens.appendChild(btnAdd);
-    }
 
     function atualizarInterfaceImagens() {
         const itens = containerInputs.querySelectorAll('.item-imagem');
         btnAdd.style.display = itens.length >= maxImagens ? 'none' : 'inline-block';
-        
         itens.forEach(item => {
             const btnRemover = item.querySelector('.btn-remover');
             btnRemover.style.display = itens.length > 1 ? 'block' : 'none';
@@ -205,33 +151,25 @@ document.addEventListener('DOMContentLoaded', function() {
 
     btnAdd.onclick = criarNovoInputImagem;
 
-    // Inicializa com um campo
     if (containerInputs.querySelectorAll('.item-imagem').length === 0) {
         criarNovoInputImagem();
     }
 
     // --- LÓGICA DE EXIBIÇÃO CONDICIONAL ---
-
     function toggleCampos() {
         const tipo = tipoSelect.value;
-        
-        // SEMPRE mostra o campo de imagens, independente do tipo
         divImagens.style.display = 'block';
-        containerInputs.querySelectorAll('input').forEach(i => i.disabled = false);
 
         if (tipo === 'equipamento') {
             divEquipamento.style.display = 'block';
             setorAvulsoInput.value = '';
         } else {
-            // Se for avulso, esconde apenas o seletor de equipamento
             divEquipamento.style.display = 'none';
-            // Vincula o setor selecionado ao input oculto do chamado avulso
             setorAvulsoInput.value = setorSelect.value;
         }
     }
 
     // --- AJAX E EQUIPAMENTOS ---
-
     setorSelect.addEventListener('change', function() {
         const setorId = this.value;
         if (tipoSelect.value === 'avulso') setorAvulsoInput.value = setorId;
@@ -264,10 +202,6 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             previewEquipamento.style.display = 'none';
         }
-    });
-
-    todosCheck.addEventListener('change', function() {
-        mecanicoChecks.forEach(check => check.checked = this.checked);
     });
 
     tipoSelect.addEventListener('change', toggleCampos);

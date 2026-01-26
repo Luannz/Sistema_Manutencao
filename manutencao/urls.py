@@ -18,6 +18,8 @@ urlpatterns = [
     path('historicos/', views.historicos, name='historicos'),
     path('historicos/equipamento/<int:equipamento_id>/', views.historico_equipamento, name='historico_equipamento'),
     path('historicos/setor/<int:setor_id>/', views.historico_setor, name='historico_setor'),
+    path('admin-manutencao/', views.dashboard_admin_manutencao, name='dashboard_admin_manutencao'),
+    path('chamado/<int:chamado_id>/atribuir/', views.atribuir_chamado, name='atribuir_chamado'),
 ]
 
 if settings.DEBUG:

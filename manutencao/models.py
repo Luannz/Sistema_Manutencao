@@ -13,6 +13,7 @@ class Usuario(AbstractUser):
     TIPO_CHOICES = [
         ('solicitante', 'Solicitante'),
         ('mecanico', 'Mecânico'),
+        ('mecanico_admin', 'Mecânico Admin')
     ]
     tipo = models.CharField(max_length=20, choices=TIPO_CHOICES)
     telefone = models.CharField(max_length=15, blank=True)
@@ -20,6 +21,10 @@ class Usuario(AbstractUser):
     class Meta:
         verbose_name = 'Usuário'
         verbose_name_plural = 'Usuários'
+    @property
+    def is_manutencao(self):
+        """Retorna True se o usuário for qualquer tipo de mecânico"""
+        return self.tipo in ['mecanico', 'mecanico_admin']
 
 
 class Setor(models.Model):
@@ -93,8 +98,8 @@ class Chamado(models.Model):
     ]
     
     solicitante = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='chamados_criados')
-    mecanicos = models.ManyToManyField(Usuario, related_name='chamados_atribuidos', limit_choices_to={'tipo': 'mecanico'})
-    
+    mecanicos = models.ManyToManyField(Usuario, related_name='chamados_atribuidos', blank=True)  
+
     tipo = models.CharField(max_length=20, choices=TIPO_CHOICES)
     equipamento = models.ForeignKey(Equipamento, on_delete=models.SET_NULL, null=True, blank=True)
     setor_avulso = models.ForeignKey(Setor, on_delete=models.SET_NULL, null=True, blank=True)

@@ -1,0 +1,163 @@
+{% extends 'manutencao/base.html' %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-user-shield me-2 text-primary"></i>Painel de Gestão (Admin)</h2>
+        <div class="text-muted">
+            <span class="badge bg-secondary border shadow-sm p-2 text-dark">
+                Setores: {{ setores.count }}
+            </span>
+            <span class="badge bg-secondary border shadow-sm p-2 text-dark ms-2">
+                Equipamentos: {{ equipamentos.count }}
+            </span>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-warning mb-5">
+        <div class="card-header bg-warning bg-opacity-10 text-dark fw-bold">
+            <i class="fas fa-exclamation-triangle me-2"></i>Aguardando Designação
+            <span class="badge bg-dark ms-2">{{ chamados_novos.count }}</span>
+        </div>
+        <div class="card-body">
+            {% if chamados_novos %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Data</th>
+                            <th>Equipamento</th>
+                            <th>Solicitante</th>
+                            <th>Descrição</th>
+                            <th class="text-center">Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for chamado in chamados_novos %}
+                        <tr>
+                            <td>{{ chamado.criado_em|date:"d/m/Y H:i" }}</td>
+                            <td>
+                                <strong>{{ chamado.equipamento.nome }}</strong><br>
+                                <small class="text-muted">{{ chamado.setor_avulso.nome|default:chamado.equipamento.setor.nome }}</small>
+                            </td>
+                            <td>{{ chamado.solicitante.get_full_name|default:chamado.solicitante.username }}</td>
+                            <td><small>{{ chamado.descricao|truncatewords:10 }}</small></td>
+                            <td class="text-center">
+                                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalDesignar{{ chamado.id }}">
+                                    <i class="fas fa-user-plus me-1"></i>Designar Equipe
+                                </button>
+                            </td>
+                        </tr>
+
+                        <div class="modal fade" id="modalDesignar{{ chamado.id }}" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <form action="{% url 'atribuir_chamado' chamado.id %}" method="post">
+                                    {% csrf_token %}
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Designar para Chamado #{{ chamado.id }}</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <p class="small text-muted mb-3">Selecione um ou mais mecânicos para realizar este serviço.</p>
+                                            
+                                            <div class="card bg-light p-3">
+                                                <div class="form-check mb-2">
+                                                    <input class="form-check-input select-all" type="checkbox" id="all{{ chamado.id }}" data-chamado="{{ chamado.id }}" checked>
+                                                    <label class="form-check-label fw-bold text-primary" for="all{{ chamado.id }}">Selecionar Todos</label>
+                                                </div>
+                                                <hr class="my-2">
+                                                
+                                                {% for mecanico in mecanicos %}
+                                                <div class="form-check">
+                                                    <input class="form-check-input mecanico-check-{{ chamado.id }}" type="checkbox" 
+                                                           name="mecanicos" value="{{ mecanico.id }}" id="m{{ chamado.id }}{{ mecanico.id }}" checked>
+                                                    <label class="form-check-label" for="m{{ chamado.id }}{{ mecanico.id }}">
+                                                        {{ mecanico.get_full_name|default:mecanico.username }}
+                                                    </label>
+                                                </div>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                            <button type="submit" class="btn btn-success">Confirmar Atribuição</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-4 text-muted">
+                <i class="fas fa-check-circle fa-2x mb-2 text-success"></i>
+                <p>Nenhum chamado pendente de atribuição.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-info">
+        <div class="card-header bg-info bg-opacity-10 text-dark fw-bold">
+            <i class="fas fa-tools me-2"></i>Serviços em Andamento
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-sm table-hover">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Equipamento/Setor</th>
+                            <th>Mecânicos Designados</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for chamado in chamados_em_andamento %}
+                        <tr>
+                            <td>{{ chamado.id }}</td>
+                            <td>
+                                {% if chamado.equipamento %}
+                                    <i class="fas fa-cog text-muted me-1"></i> {{ chamado.equipamento.nome }}
+                                    <br><small class="text-muted">{{ chamado.equipamento.setor.nome }}</small>
+                                {% else %}
+                                    <i class="fas fa-building text-muted me-1"></i> {{ chamado.setor_avulso.nome }}
+                                    <br><span class="badge bg-light text-dark border" style="font-size: 0.7rem;">AVULSO</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% for mec in chamado.mecanicos.all %}
+                                    <span class="badge bg-light text-dark border">{{ mec.username }}</span>
+                                {% empty %}
+                                    <span class="text-muted small">Não atribuído</span>
+                                {% endfor %}
+                            </td>
+                            <td><span class="badge bg-success">Já Designado</span></td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="4" class="text-center text-muted">Nenhum serviço em andamento.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <small class="text-muted d-block text-center mt-2">
+        <i class="fas fa-info-circle me-1"></i>Ultimos 10 chamados
+    </small>
+</div>
+
+<script>
+// Lógica para os Checkboxes "Selecionar Todos" dentro dos Modals
+document.querySelectorAll('.select-all').forEach(masterCheck => {
+    masterCheck.addEventListener('change', function() {
+        const id = this.getAttribute('data-chamado');
+        const children = document.querySelectorAll('.mecanico-check-' + id);
+        children.forEach(child => child.checked = this.checked);
+    });
+});
+</script>
+{% endblock %}

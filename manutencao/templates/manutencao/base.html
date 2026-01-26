@@ -141,7 +141,7 @@
 
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto align-items-center">
-                    {% if user.tipo == 'mecanico' %}
+                    {% if user.tipo == 'mecanico' or 'mecanico_admin' %}
                     <li class="nav-item me-2">
                         <a class="nav-link" href="{% url 'historicos' %}">
                             <i class="fas fa-history me-1"></i> HISTÓRICOS
@@ -157,6 +157,13 @@
                             <i class="fas fa-microchip me-1"></i> EQUIPAMENTOS
                         </a>
                     </li>
+                    {% endif %}
+                    {% if user.tipo == 'mecanico_admin' %}
+                        <li class='nav-item me-2'>
+                            <a class='nav-link' href="{% url 'dashboard_admin_manutencao'%}">
+                                <i class='fas fa-microchip me-1'></i> ADMIN
+                            </a>
+                        </li>
                     {% endif %}
                     
                     <li class="nav-item">

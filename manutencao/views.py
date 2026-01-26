@@ -32,7 +32,9 @@ def logout_view(request):
 
 @login_required
 def dashboard(request):
-    if request.user.tipo == 'mecanico':
+    if request.user.tipo == 'mecanico_admin':
+        return redirect('mecanico_dashboard')
+    elif request.user.tipo == 'mecanico':
         return redirect('mecanico_dashboard')
     else:
         return redirect('solicitante_dashboard')
@@ -73,10 +75,50 @@ def solicitante_dashboard(request):
         'data_atual': data_filtro,
     })
 
+@login_required
+def dashboard_admin_manutencao(request):
+    if request.user.tipo != 'mecanico_admin':
+        return redirect('dashboard')
+    
+    # 1 Chamados NOVOS (Aguardando designacao)
+    chamados_novos = Chamado.objects.filter(mecanicos__isnull=True).order_by('-criado_em')
+    
+    # 2 Chamados EM ANDAMENTO (ja designados)
+    chamados_em_andamento = Chamado.objects.filter(mecanicos__isnull=False)\
+    .select_related('equipamento', 'equipamento__setor', 'setor_avulso')\
+    .prefetch_related('mecanicos')\
+    .distinct()
+    
+    # 3 Dados auxiliares para o dashboard
+    mecanicos = Usuario.objects.filter(tipo__in=['mecanico', 'mecanico_admin'])
+    setores = Setor.objects.all()
+    equipamentos = Equipamento.objects.all()
+    chamados_em_andamento = chamados_em_andamento[:10]
+    
+    return render(request, 'manutencao/admin_dashboard.html', {
+        'chamados_novos': chamados_novos,
+        'chamados_em_andamento': chamados_em_andamento,
+        'mecanicos': mecanicos,
+        'setores': setores,
+        'equipamentos': equipamentos
+    })
+
+@login_required
+def atribuir_chamado(request, chamado_id):
+    if request.user.tipo != 'mecanico_admin':
+        return redirect('dashboard')
+        
+    chamado = get_object_or_404(Chamado, id=chamado_id)
+    if request.method == 'POST':
+        mecanicos_ids = request.POST.getlist('mecanicos')
+        chamado.mecanicos.set(mecanicos_ids) # Atribui os selecionados
+        messages.success(request, f"Chamado {chamado.id} atribuído com sucesso!")
+        
+    return redirect('dashboard_admin_manutencao')
 
 @login_required
 def mecanico_dashboard(request):
-    if request.user.tipo != 'mecanico':
+    if not request.user.is_manutencao:
         return redirect('dashboard')
     
     # lógica de filtros continua IGUAL até o final
@@ -129,7 +171,7 @@ def mecanico_dashboard(request):
 
 @login_required
 def historicos(request):
-    if request.user.tipo != 'mecanico':
+    if not request.user.is_manutencao:
         return redirect('dashboard')
     
     setores = Setor.objects.all()
@@ -239,7 +281,7 @@ def criar_chamado(request):
 
 @login_required
 def atualizar_status(request, chamado_id):
-    if request.user.tipo != 'mecanico':
+    if not request.user.is_manutencao:
         return redirect('dashboard')
     
     chamado = get_object_or_404(Chamado, id=chamado_id, mecanicos=request.user)
@@ -274,7 +316,7 @@ def atualizar_status(request, chamado_id):
 
 @login_required
 def gerenciar_setores(request):
-    if request.user.tipo != 'mecanico':
+    if not request.user.is_manutencao:
         return redirect('dashboard')
     
     if request.method == 'POST':
@@ -297,7 +339,7 @@ def gerenciar_setores(request):
 
 @login_required
 def gerenciar_equipamentos(request):
-    if request.user.tipo != 'mecanico':
+    if not request.user.is_manutencao:
         return redirect('dashboard')
     
     if request.method == 'POST':
