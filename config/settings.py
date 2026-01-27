@@ -27,13 +27,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-^#gc)2kzl@=99od4bc4#&ck+ff_wh8eaf%!8c%t632rj^hn_j&'
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
 
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
-    '192.168.2.4'
+    '0.0.0.0',
+    '192.168.2.4',
+    '192.168.2.5',
 ]
 
 
@@ -86,27 +88,24 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
 # Configuração Inteligente de Banco de Dados
-if os.getenv('DB_NAME'):
-    # Se existir configuração de banco no .env (DOCKER / PRODUÇÃO)
+if os.getenv('DB_NAME'):  # Alterado para DB_NAME
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
             'NAME': os.getenv('DB_NAME'),
             'USER': os.getenv('DB_USER'),
             'PASSWORD': os.getenv('DB_PASSWORD'),
-            'HOST': os.getenv('DB_HOST'), 
+            'HOST': os.getenv('DB_HOST', 'db'),
             'PORT': os.getenv('DB_PORT', '5432'),
         }
     }
 else:
-    # Se NÃO tiver .env ou DB_NAME (DESENVOLVIMENTO LOCAL)
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
@@ -147,6 +146,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760

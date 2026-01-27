@@ -141,7 +141,7 @@
 
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto align-items-center">
-                    {% if user.tipo == 'mecanico' or 'mecanico_admin' %}
+                    {% if user.is_manutencao %}
                     <li class="nav-item me-2">
                         <a class="nav-link" href="{% url 'historicos' %}">
                             <i class="fas fa-history me-1"></i> HISTÓRICOS
