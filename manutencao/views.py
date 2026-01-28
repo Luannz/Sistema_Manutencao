@@ -10,6 +10,7 @@ from django.db.models import Case, When, Value, IntegerField, Q
 from .models import Usuario, Setor, Equipamento, Chamado, ImagemChamado
 from .forms import ChamadoForm, SetorForm, EquipamentoForm
 from datetime import datetime, timedelta
+import os
 
 
 def login_view(request):
@@ -336,6 +337,25 @@ def gerenciar_setores(request):
         'total_setores': total_setores
     })
 
+def editar_setor(request, pk):
+    setor = get_object_or_404(Setor, pk=pk)
+    
+    if request.method == 'POST':
+        form = SetorForm(request.POST, instance=setor)
+        if form.is_valid():
+            form.save()
+            return redirect('gerenciar_setores')
+    else:
+        form = SetorForm(instance=setor)
+
+    #busca todos os setores para a lista lateral não ficar vazia
+    setores = Setor.objects.all().order_by('nome')
+    
+    return render(request, 'manutencao/gerenciar_setores.html', {
+        'form': form,
+        'setores': setores,
+        'editando': True
+    })
 
 @login_required
 def gerenciar_equipamentos(request):
@@ -359,6 +379,32 @@ def gerenciar_equipamentos(request):
         'total_equipamentos': total_equipamentos
     })
 
+def editar_equipamento(request, pk):
+    equipamento = get_object_or_404(Equipamento, pk=pk)
+    imagem_antiga = equipamento.imagem # Guarda a referência antes de mudar
+    
+    if request.method == 'POST':
+        form = EquipamentoForm(request.POST, request.FILES, instance=equipamento)
+        if form.is_valid():
+            # Se enviaram uma imagem nova E já existia uma antiga
+            if 'imagem' in request.FILES and imagem_antiga:
+                if os.path.exists(imagem_antiga.path):
+                    os.remove(imagem_antiga.path)
+            
+            form.save()
+            return redirect('gerenciar_equipamentos')
+    else:
+        form = EquipamentoForm(instance=equipamento)
+
+    # Pegam a lista novamente para ela não sumir da lateral enquanto editando
+    equipamentos = Equipamento.objects.all().order_by('-criado_em')
+    
+    return render(request, 'manutencao/gerenciar_equipamentos.html', {
+        'form': form,
+        'equipamentos': equipamentos,
+        'total_equipamentos': equipamentos.count(),
+        'editando': True # Variável para mudar os textos no HTML
+    })
 
 @login_required
 def get_equipamentos_por_setor(request, setor_id):

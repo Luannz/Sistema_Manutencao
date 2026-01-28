@@ -10,7 +10,10 @@
             <div class="col-md-5 mb-4">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title mb-3">Cadastrar Novo Setor</h5>
+                        <h5 class="card-title mb-3">
+                            <i class="fas {% if editando %}fa-edit text-warning{% else %}fa-plus-circle text-primary{% endif %} me-2"></i>
+                            {% if editando %}Editando Setor: {{ form.instance.nome }}{% else %}Cadastrar Novo Setor{% endif %}
+                        </h5>
                         <form method="post">
                             {% csrf_token %}
                             
@@ -24,9 +27,16 @@
                                 {{ form.descricao }}
                             </div>
                             
-                            <button type="submit" class="btn btn-primary w-100">
-                                <i class="fas fa-plus me-2"></i>Cadastrar Setor
+                            <button type="submit" class="btn {% if editando %}btn-warning{% else %}btn-primary{% endif %} w-100">
+                                <i class="fas {% if editando %}fa-save{% else %}fa-plus{% endif %} me-2"></i>
+                                {% if editando %}Salvar Alterações{% else %}Cadastrar Setor{% endif %}
                             </button>
+
+                            {% if editando %}
+                            <a href="{% url 'gerenciar_setores' %}" class="btn btn-link w-100 mt-2 text-muted text-decoration-none">
+                                <i class="fas fa-times me-1"></i>Cancelar Edição
+                            </a>
+                            {% endif %}
                         </form>
                     </div>
                 </div>
@@ -60,9 +70,15 @@
                                             {{ setor.equipamentos.count }} equipamento(s)
                                         </small>
                                     </div>
-                                    <span class="badge bg-primary">
-                                        {{ setor.criado_em|date:"d/m/Y" }}
-                                    </span>
+                                    <div class="d-flex align-items-center">
+                                        <a href="{% url 'editar_setor' setor.id %}" class="btn btn-sm btn-outline-primary me-2" title="Editar Setor">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        
+                                        <span class="badge bg-primary">
+                                            {{ setor.criado_em|date:"d/m/Y" }}
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                             {% endfor %}
