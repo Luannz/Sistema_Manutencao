@@ -12,12 +12,13 @@ services:
 
   web:
     build: .
+    volumes:
+      - .:/code
+      - media_data:/code/media
     command: >
       sh -c "sleep 5 &&
              python manage.py migrate &&
              python manage.py runserver 0.0.0.0:8000"
-    volumes:
-      - .:/app
     ports:
       - "8000:8000"
     environment:
@@ -31,3 +32,4 @@ services:
 
 volumes:
   postgres_data:
+  media_data:

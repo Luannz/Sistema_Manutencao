@@ -26,7 +26,7 @@
                     <thead class="table-light">
                         <tr>
                             <th>Data</th>
-                            <th>Equipamento</th>
+                            <th>Equipamento/Setor</th>
                             <th>Solicitante</th>
                             <th>Descrição</th>
                             <th class="text-center">Ação</th>
@@ -37,8 +37,13 @@
                         <tr>
                             <td>{{ chamado.criado_em|date:"d/m/Y H:i" }}</td>
                             <td>
-                                <strong>{{ chamado.equipamento.nome }}</strong><br>
-                                <small class="text-muted">{{ chamado.setor_avulso.nome|default:chamado.equipamento.setor.nome }}</small>
+                                {% if chamado.tipo == 'equipamento' %}
+                                    <strong>{{ chamado.equipamento.nome }}</strong>
+                                {% else %}
+                                    <span class="badge bg-light text-dark border mb-1" style="font-size: 0.7rem;">AVULSO</span>
+                                {% endif %}
+                                <br>
+                                <small class="text-muted"><i class="fas fa-map-marker-alt me-1"></i>{{ chamado.nome_setor }}</small>
                             </td>
                             <td>{{ chamado.solicitante.get_full_name|default:chamado.solicitante.username }}</td>
                             <td><small>{{ chamado.descricao|truncatewords:10 }}</small></td>
@@ -120,13 +125,13 @@
                         <tr>
                             <td>{{ chamado.id }}</td>
                             <td>
-                                {% if chamado.equipamento %}
-                                    <i class="fas fa-cog text-muted me-1"></i> {{ chamado.equipamento.nome }}
-                                    <br><small class="text-muted">{{ chamado.equipamento.setor.nome }}</small>
+                                {% if chamado.tipo == 'equipamento' %}
+                                    <i class="fas fa-cog text-muted me-1"></i> <strong>{{ chamado.equipamento.nome }}</strong>
                                 {% else %}
-                                    <i class="fas fa-building text-muted me-1"></i> {{ chamado.setor_avulso.nome }}
-                                    <br><span class="badge bg-light text-dark border" style="font-size: 0.7rem;">AVULSO</span>
+                                    <i class="fas fa-building text-muted me-1"></i> <span class="badge bg-light text-dark border" style="font-size: 0.7rem;">AVULSO</span>
                                 {% endif %}
+                                <br>
+                                <small class="text-muted">{{ chamado.nome_setor }}</small>
                             </td>
                             <td>
                                 {% for mec in chamado.mecanicos.all %}

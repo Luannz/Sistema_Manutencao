@@ -119,6 +119,14 @@ class Chamado(models.Model):
         verbose_name = 'Chamado'
         verbose_name_plural = 'Chamados'
         ordering = ['-criado_em']
+
+    @property
+    def nome_setor(self):
+        if self.tipo == 'avulso' and self.setor_avulso:
+            return self.setor_avulso.nome
+        if self.tipo == 'equipamento' and self.equipamento and self.equipamento.setor:
+            return self.equipamento.setor.nome
+        return "N/A"
     
     def esta_concluido(self):
         return self.status == 'concluido'
