@@ -77,7 +77,15 @@
                     <i class="fas fa-calendar me-1"></i>
                     Criado em {{ chamado.criado_em|date:"d/m/Y H:i" }}
                 </p>
-
+                <p class="text-muted small mb-1">
+                    <i class="fas fa-tools me-1"></i>
+                    <strong>Mecânicos:</strong>
+                    {% for mec in chamado.mecanicos.all %}
+                        {{ mec.username }}{% if not forloop.last %}, {% endif %}
+                    {% empty %}
+                        <span class="text-danger italic">Nenhum designado</span>
+                    {% endfor %}
+                </p>
                 {% if chamado.status == 'concluido' %}
                     <p class="small mb-1">
                         <i class="fas fa-stopwatch me-1"></i>
