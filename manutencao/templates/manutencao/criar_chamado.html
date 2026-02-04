@@ -155,6 +155,23 @@ document.addEventListener('DOMContentLoaded', function() {
         criarNovoInputImagem();
     }
 
+    // --- BLOQUEIO DE CLIQUES DUPLOS ---
+    const form = document.getElementById('formChamado');
+    const btnSubmit = form.querySelector('button[type="submit"]');
+
+    form.addEventListener('submit', function() {
+        //  Desabilita o botão para evitar novos cliques
+        btnSubmit.disabled = true;
+        
+        //  Muda o visual para dar feedback ao usuário
+        btnSubmit.innerHTML = `
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            Enviando Chamado...
+        `;
+        
+        // O formulário continua o envio normalmente após isso
+    });
+
     // --- LÓGICA DE EXIBIÇÃO CONDICIONAL ---
     function toggleCampos() {
         const tipo = tipoSelect.value;

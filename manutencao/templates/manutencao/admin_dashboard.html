@@ -29,6 +29,7 @@
                             <th>Equipamento/Setor</th>
                             <th>Solicitante</th>
                             <th>Descrição</th>
+                            <th>Prioridade Solicitante</th>
                             <th class="text-center">Ação</th>
                         </tr>
                     </thead>
@@ -47,6 +48,15 @@
                             </td>
                             <td>{{ chamado.solicitante.get_full_name|default:chamado.solicitante.username }}</td>
                             <td><small>{{ chamado.descricao|truncatewords:10 }}</small></td>
+                            <td>
+                                {% if chamado.prioridade == 1 %}
+                                    <span class="badge bg-danger">Alta</span>
+                                {% elif chamado.prioridade == 2 %}
+                                    <span class="badge bg-warning text-dark">Média</span>
+                                {% else %}
+                                    <span class="badge bg-info text-dark">Baixa</span>
+                                {% endif %}
+                            </td>
                             <td class="text-center">
                                 <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalDesignar{{ chamado.id }}">
                                     <i class="fas fa-user-plus me-1"></i>Designar Equipe
@@ -64,6 +74,16 @@
                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </div>
                                         <div class="modal-body">
+                                            <div class="mb-3">
+                                                <label class="form-label fw-bold">
+                                                    <i class="fas fa-layer-group me-1"></i>Definir Prioridade Técnica:
+                                                </label>
+                                                <select name="prioridade" class="form-select border-primary">
+                                                    <option value="1" {% if chamado.prioridade == 1 %}selected{% endif %}>Alta</option>
+                                                    <option value="2" {% if chamado.prioridade == 2 %}selected{% endif %}>Média</option>
+                                                    <option value="3" {% if chamado.prioridade == 3 %}selected{% endif %}>Baixa</option>
+                                                </select>
+                                            </div>
                                             <p class="small text-muted mb-3">Selecione um ou mais mecânicos para realizar este serviço.</p>
                                             
                                             <div class="card bg-light p-3">

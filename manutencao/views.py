@@ -14,6 +14,8 @@ import os
 
 
 def login_view(request):
+    if request.user.is_authenticated:
+        return redirect ('dashboard')
     if request.method == 'POST':
         from django.contrib.auth import authenticate
         username = request.POST.get('username')
@@ -110,11 +112,22 @@ def atribuir_chamado(request, chamado_id):
         return redirect('dashboard')
         
     chamado = get_object_or_404(Chamado, id=chamado_id)
+    
     if request.method == 'POST':
+        #  Captura a nova prioridade definida pelo Admin e salva no banco
+        nova_prioridade = request.POST.get('prioridade')
+        if nova_prioridade:
+            chamado.prioridade = int(nova_prioridade)
+            chamado.save() # importante salvar para a prioridade persistir
+
+        # Atribui a equipe de mecânicos
         mecanicos_ids = request.POST.getlist('mecanicos')
-        chamado.mecanicos.set(mecanicos_ids) # Atribui os selecionados
-        messages.success(request, f"Chamado {chamado.id} atribuído com sucesso!")
-        
+        if mecanicos_ids:
+            chamado.mecanicos.set(mecanicos_ids)
+            messages.success(request, f"Chamado {chamado.id} atribuído e prioridade atualizada!")
+        else:
+            messages.warning(request, f"Chamado {chamado.id} atualizado, mas sem equipe técnica.")
+            
     return redirect('dashboard_admin_manutencao')
 
 @login_required
@@ -266,10 +279,13 @@ def criar_chamado(request):
             arquivos = request.FILES.getlist('imagens')
             for f in arquivos:
                 ImagemChamado.objects.create(chamado=chamado, imagem=f)
-
+            messages.success(request, "Chamado criado com sucesso!")
             return redirect('solicitante_dashboard')
+        else:
+            messages.error(request, "Erro ao criar chamado, Verifique os campos")
     else:
         form = ChamadoForm()
+    #Deixando os campos mecanicos e setores fora do else pra eles carregarem mesmo se der erro no form    
     mecanicos = Usuario.objects.filter(tipo='mecanico')
     setores = Setor.objects.all()
     
