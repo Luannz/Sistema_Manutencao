@@ -279,8 +279,13 @@ def criar_chamado(request):
             arquivos = request.FILES.getlist('imagens')
             for f in arquivos:
                 ImagemChamado.objects.create(chamado=chamado, imagem=f)
+                
             messages.success(request, "Chamado criado com sucesso!")
+
+            if request.user.tipo == 'mecanico_admin':
+                return redirect('solicitante_dashboard')
             return redirect('solicitante_dashboard')
+
         else:
             messages.error(request, "Erro ao criar chamado, Verifique os campos")
     else:

@@ -74,9 +74,12 @@
                         <button type="submit" class="btn btn-primary btn-lg">
                             <i class="fas fa-paper-plane me-2"></i>Enviar Chamado
                         </button>
-                        <a href="{% url 'solicitante_dashboard' %}" class="btn btn-outline-secondary">
-                            Cancelar
-                        </a>
+                        
+                        {% if user.tipo == 'mecanico_admin' %}
+                            <a href="{% url 'dashboard_admin_manutencao' %}" class="btn btn-outline-secondary">Cancelar</a>
+                        {% else %}
+                            <a href="{% url 'solicitante_dashboard' %}" class="btn btn-outline-secondary">Cancelar</a>
+                        {% endif %}
                     </div>
                 </form>
             </div>
