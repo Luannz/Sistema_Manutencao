@@ -77,7 +77,7 @@
                             {% for equipamento in equipamentos %}
                             <div class="list-group-item">
                                 <div class="row align-items-center">
-                                    {% if equipamento.imagem %}
+                                    {% if equipamento.imagem.url %}
                                     <div class="col-auto">
                                         <img src="{{ equipamento.imagem.url }}" 
                                              alt="{{ equipamento.nome }}" 
