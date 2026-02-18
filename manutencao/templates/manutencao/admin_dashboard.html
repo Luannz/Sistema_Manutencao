@@ -43,9 +43,15 @@
                     </thead>
                     <tbody>
                         {% for chamado in chamados_novos %}
-                        <tr>
+                        <tr class='align-top'>
                             <td>{{ chamado.criado_em|date:"d/m/Y H:i" }}</td>
                             <td>
+                                {% if chamado.producao_parada %}
+                                    <span class="badge bg-danger animate__animated animate__flash animate__infinite">
+                                        <i class="fas fa-stop-circle"></i> PRODUÇÃO PARADA
+                                    </span>
+                                {% endif %}
+
                                 {% if chamado.tipo == 'equipamento' %}
                                     <strong>{{ chamado.equipamento.nome }}</strong>
                                 {% else %}

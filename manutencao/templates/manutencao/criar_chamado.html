@@ -65,6 +65,20 @@
                         </button>
                     </div>
                     
+                    <div class="mb-3 border rounded p-3 {% if form.producao_parada.value %}bg-light-danger{% endif %}" style="border-left: 5px solid #dc3545 !important;">
+                        <label class="form-label d-block fw-bold text-danger">
+                            <i class="fas fa-exclamation-triangle me-2"></i>Produção Parada?
+                        </label>
+                        {% for radio in form.producao_parada %}
+                            <div class="form-check form-check-inline">
+                                {{ radio.tag }}
+                                <label class="form-check-label" for="{{ radio.id_for_label }}">
+                                    {{ radio.choice_label }}
+                                </label>
+                            </div>
+                        {% endfor %}
+                    </div>
+
                     <div class="mb-4">
                         <label class="form-label fw-semibold">Prioridade</label>
                         {{ form.prioridade }}

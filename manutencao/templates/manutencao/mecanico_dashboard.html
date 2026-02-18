@@ -135,6 +135,11 @@
                         <strong>Aberto há:</strong> {{ chamado.tempo_aberto_formatado }}
                     </p>
                 {% endif %}
+                {% if chamado.producao_parada %}
+                    <span class="badge bg-danger animate__animated animate__flash animate__infinite">
+                        <i class="fas fa-stop-circle"></i> PRODUÇÃO PARADA
+                    </span>
+                {% endif %}
 
                 <hr class="my-2 opacity-25">
 

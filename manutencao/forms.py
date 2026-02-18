@@ -10,13 +10,14 @@ class ChamadoForm(forms.ModelForm):
     
     class Meta:
         model = Chamado
-        fields = ['tipo', 'equipamento', 'setor_avulso', 'descricao', 'prioridade']
+        fields = ['tipo', 'equipamento', 'setor_avulso', 'descricao', 'prioridade', 'producao_parada']
         widgets = {
             'descricao': forms.Textarea(attrs={'rows': 4, 'class': 'form-control', 'placeholder': 'Descreva o problema...'}),
             'tipo': forms.Select(attrs={'class': 'form-control'}),
             'equipamento': forms.Select(attrs={'class': 'form-control'}),
             'setor_avulso': forms.Select(attrs={'class': 'form-control'}),
             'prioridade': forms.Select(attrs={'class': 'form-control'}),
+            'producao_parada': forms.RadioSelect(choices=[(True, 'Sim'), (False, 'Não')], attrs={'class': 'form-check-input'}),
         }
     
     def clean(self):
