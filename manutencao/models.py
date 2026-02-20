@@ -77,6 +77,37 @@ class Equipamento(models.Model):
     
     def __str__(self):
         return f"{self.nome} - {self.setor.nome}"
+    # --- NOVO MÉTODO SAVE ---
+    def save(self, *args, **kwargs):
+        # Verifica se existe uma imagem e se ela é um arquivo novo (evita re-processar o que já está salvo)
+        if self.imagem and hasattr(self.imagem, 'file'):
+            self.otimizar_imagem()
+        
+        super().save(*args, **kwargs)
+
+    def otimizar_imagem(self):
+        # 1. Abre a imagem usando o Pillow
+        img = Image.open(self.imagem)
+        
+        # 2. Converte para RGB (necessário para salvar como JPEG)
+        if img.mode != 'RGB':
+            img = img.convert('RGB')
+            
+        # 3. Redimensiona para um tamanho máximo (Ex: 1024px) mantendo a proporção
+        output_size = (1024, 1024)
+        img.thumbnail(output_size, Image.LANCZOS)
+        
+        # 4. Salva o resultado em memória (BytesIO)
+        buffer = BytesIO()
+        img.save(buffer, format='JPEG', quality=75, optimize=True)
+        buffer.seek(0)
+        
+        # 5. Substitui a imagem original pelo arquivo otimizado
+        nome_arquivo = os.path.basename(self.imagem.name)
+        nome_sem_extensao = os.path.splitext(nome_arquivo)[0]
+        
+        # Salva com extensão .jpg para garantir a compressão
+        self.imagem = File(buffer, name=f"{nome_sem_extensao}.jpg")
 
 
 class Chamado(models.Model):
