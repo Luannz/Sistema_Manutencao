@@ -6,6 +6,7 @@ from PIL import Image
 import os
 from io import BytesIO
 from django.core.files.base import ContentFile
+from django.core.files import File
 from django.core.exceptions import ValidationError
 import time
 
