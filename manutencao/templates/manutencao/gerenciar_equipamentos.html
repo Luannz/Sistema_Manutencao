@@ -125,8 +125,8 @@ document.getElementById('id_imagem').addEventListener('change', function() {
     const aviso = document.getElementById('aviso-imagem');
     
     if (file) {
-        if (file.size > 2 * 1024 * 1024) { // 2MB
-            alert("Atenção: Esta imagem é muito grande (" + (file.size/1024/1024).toFixed(2) + "MB). Por favor, selecione uma imagem menor que 2MB.");
+        if (file.size > 5 * 1024 * 1024) { // 5MB
+            alert("Atenção: Esta imagem é muito grande (" + (file.size/1024/1024).toFixed(2) + "MB). Por favor, selecione uma imagem menor que 5MB.");
             this.value = ""; // Limpa o campo
         }
     }
