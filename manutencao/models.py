@@ -42,9 +42,9 @@ class Setor(models.Model):
         return self.nome
 
 def validar_tamanho_imagem(value):
-    limit = 2 * 1024 * 1024  # 2MB
+    limit = 5 * 1024 * 1024  # 5MB
     if value.size > limit:
-        raise ValidationError('A imagem é muito pesada. O limite é de 2MB.')
+        raise ValidationError('A imagem é muito pesada. O limite é de 5MB.')
     
 def caminho_imagem_equipamento(instance, filename):
     # Pega a extensao original e força para minúsculo (.PNG > .png)
