@@ -43,7 +43,7 @@
                                 <label class="form-label fw-semibold">Imagem do Equipamento</label>
                                 {{ form.imagem }}
                                 <div id="aviso-imagem" class="form-text text-muted">
-                                    Use arquivos JPG, PNG ou WebP de no máximo 2MB.
+                                    Use arquivos JPG, PNG ou WebP de no máximo 5MB.
                                 </div>
                             </div>
                             
@@ -68,9 +68,21 @@
                                 <i class="fas fa-list me-2"></i>Equipamentos Cadastrados
                             </span>
                             <span class="badge bg-secondary">
-                                {{ total_equipamentos }} Equipamentos
+                                {{ total_equipamentos }} Total
                             </span>
                         </h5>
+
+                        <form method="GET" class="mb-3">
+                            <div class="input-group input-group-sm">
+                                <input type="text" name="search" class="form-control" placeholder="Buscar por nome ou código..." value="{{ busca }}">
+                                <button class="btn btn-primary" type="submit">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                                {% if busca %}
+                                    <a href="{% url 'gerenciar_equipamentos' %}" class="btn btn-secondary">Limpar</a>
+                                {% endif %}
+                            </div>
+                        </form>
                         
                         {% if equipamentos %}
                         <div class="list-group">
@@ -91,15 +103,12 @@
                                             <span class="badge bg-secondary">{{ equipamento.codigo }}</span>
                                             <span class="badge bg-info">{{ equipamento.setor.nome }}</span>
                                         </p>
-                                        {% if equipamento.descricao %}
-                                        <small class="text-muted">{{ equipamento.descricao|truncatewords:15 }}</small>
-                                        {% endif %}
                                     </div>
-                                    <div class="col-auto">
+                                    <div class="col-auto text-end">
                                         <a href="{% url 'editar_equipamento' equipamento.id %}" class="btn btn-sm btn-outline-primary">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        <small class="text-muted d-block mt-1">
+                                        <small class="text-muted d-block mt-1" style="font-size: 0.7rem;">
                                             {{ equipamento.criado_em|date:"d/m/Y" }}
                                         </small>
                                     </div>
@@ -107,10 +116,41 @@
                             </div>
                             {% endfor %}
                         </div>
+
+                        <div class="pagination mt-3 d-flex justify-content-center">
+                            <nav aria-label="Navegação de páginas">
+                                <ul class="pagination pagination-sm mb-0">
+                                    {% if equipamentos.has_previous %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page=1{% if busca %}&search={{ busca }}{% endif %}">&laquo;</a>
+                                        </li>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ equipamentos.previous_page_number }}{% if busca %}&search={{ busca }}{% endif %}">Anterior</a>
+                                        </li>
+                                    {% endif %}
+
+                                    <li class="page-item disabled">
+                                        <span class="page-link text-dark">
+                                            {{ equipamentos.number }} / {{ equipamentos.paginator.num_pages }}
+                                        </span>
+                                    </li>
+
+                                    {% if equipamentos.has_next %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ equipamentos.next_page_number }}{% if busca %}&search={{ busca }}{% endif %}">Próxima</a>
+                                        </li>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ equipamentos.paginator.num_pages }}{% if busca %}&search={{ busca }}{% endif %}">&raquo;</a>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                        </div>
+
                         {% else %}
-                        <div class="alert alert-info border-0">
+                        <div class="alert alert-info border-0 mt-2">
                             <i class="fas fa-info-circle me-2"></i>
-                            Nenhum equipamento cadastrado ainda.
+                            Nenhum equipamento encontrado.
                         </div>
                         {% endif %}
                     </div>
@@ -119,15 +159,14 @@
         </div>
     </div>
 </div>
+
 <script>
 document.getElementById('id_imagem').addEventListener('change', function() {
     const file = this.files[0];
-    const aviso = document.getElementById('aviso-imagem');
-    
     if (file) {
-        if (file.size > 5 * 1024 * 1024) { // 5MB
+        if (file.size > 5 * 1024 * 1024) { 
             alert("Atenção: Esta imagem é muito grande (" + (file.size/1024/1024).toFixed(2) + "MB). Por favor, selecione uma imagem menor que 5MB.");
-            this.value = ""; // Limpa o campo
+            this.value = ""; 
         }
     }
 });

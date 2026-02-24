@@ -391,13 +391,30 @@ def gerenciar_equipamentos(request):
             return redirect('gerenciar_equipamentos')
     else:
         form = EquipamentoForm()
+
+    # 1. Correção do nome: 'search' (estava 'serach')
+    busca = request.GET.get('search', '')
+
+    # 2. Filtragem dos equipamentos
+    equipamentos_list = Equipamento.objects.all().order_by('-id') # Adicionei order_by para os novos aparecerem primeiro
+    if busca:
+        equipamentos_list = equipamentos_list.filter(
+            Q(nome__icontains=busca) | Q(codigo__icontains=busca)
+        )
     
-    total_equipamentos = Equipamento.objects.count()
-    equipamentos = Equipamento.objects.all()
+    # 3. Paginação
+    paginator = Paginator(equipamentos_list, 10)
+    page_number = request.GET.get('page')
+    equipamentos = paginator.get_page(page_number)
+
+    # 4. Contador inteligente (mostra o total filtrado)
+    total_equipamentos = equipamentos_list.count()
+    
     return render(request, 'manutencao/gerenciar_equipamentos.html', {
         'form': form,
         'equipamentos': equipamentos,
-        'total_equipamentos': total_equipamentos
+        'total_equipamentos': total_equipamentos,
+        'busca': busca 
     })
 
 def editar_equipamento(request, pk):
