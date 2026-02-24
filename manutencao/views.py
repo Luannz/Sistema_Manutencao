@@ -135,7 +135,7 @@ def mecanico_dashboard(request):
     if not request.user.is_manutencao:
         return redirect('dashboard')
     
-    # lógica de filtros continua IGUAL até o final
+    # lógica de filtros continua IGUAL 
     chamados_list = Chamado.objects.filter(mecanicos=request.user).annotate(
         ordem_status=Case(
             When(status='pendente', then=Value(1)),
