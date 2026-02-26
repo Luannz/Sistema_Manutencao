@@ -2,13 +2,14 @@
 from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import AbstractUser
-from PIL import Image
+from PIL import Image, ImageOps
 import os
 from io import BytesIO
 from django.core.files.base import ContentFile
 from django.core.files import File
 from django.core.exceptions import ValidationError
 import time
+
 
 class Usuario(AbstractUser):
     TIPO_CHOICES = [
@@ -89,6 +90,9 @@ class Equipamento(models.Model):
     def otimizar_imagem(self):
         # 1. Abre a imagem usando o Pillow
         img = Image.open(self.imagem)
+
+        #gira a imagem de celular que vem virada por padrao
+        img = ImageOps.exif_transpose(img)
         
         # 2. Converte para RGB (necessário para salvar como JPEG)
         if img.mode != 'RGB':
