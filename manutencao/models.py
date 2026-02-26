@@ -8,6 +8,7 @@ from io import BytesIO
 from django.core.files.base import ContentFile
 from django.core.files import File
 from django.core.exceptions import ValidationError
+from django.core.validators import RegexValidator
 import time
 
 
@@ -71,6 +72,13 @@ class Equipamento(models.Model):
     descricao = models.TextField(blank=True)
     imagem = models.ImageField(upload_to=caminho_imagem_equipamento,  validators=[validar_tamanho_imagem], blank=True, null=True, max_length=500)    
     criado_em = models.DateTimeField(auto_now_add=True)
+    energia = models.CharField(
+        max_length=4,
+        validators=[RegexValidator(regex=r'^\d{4}$', message='Informe exatamente 4 dígitos numéricos.')],
+        blank=True, 
+        null=True,
+        verbose_name="Poste/Padrão"
+    )
     
     class Meta:
         verbose_name = 'Equipamento'

@@ -35,6 +35,14 @@
                             </div>
                             
                             <div class="mb-3">
+                                <label class="form-label fw-semibold">
+                                    <i class="fas fa-bolt text-warning me-1"></i> Poste / Padrão (4 dígitos)
+                                </label>
+                                {{ form.energia }}
+                                <div class="form-text text-muted">Ex: 1220</div>
+                            </div>
+
+                            <div class="mb-3">
                                 <label class="form-label fw-semibold">Descrição</label>
                                 {{ form.descricao }}
                             </div>
@@ -102,6 +110,11 @@
                                         <p class="mb-1">
                                             <span class="badge bg-secondary">{{ equipamento.codigo }}</span>
                                             <span class="badge bg-info">{{ equipamento.setor.nome }}</span>
+                                            {% if equipamento.energia %}
+                                            <span class="badge bg-warning text-dark">
+                                                <i class="fas fa-bolt me-1"></i>Poste: {{ equipamento.energia }}
+                                            </span>
+                                            {% endif %}
                                         </p>
                                     </div>
                                     <div class="col-auto text-end">
