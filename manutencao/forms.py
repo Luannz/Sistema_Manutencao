@@ -47,10 +47,11 @@ class ChamadoForm(forms.ModelForm):
 class SetorForm(forms.ModelForm):
     class Meta:
         model = Setor
-        fields = ['nome', 'descricao']
+        fields = ['nome', 'descricao', 'energia']
         widgets = {
             'nome': forms.TextInput(attrs={'class': 'form-control'}),
             'descricao': forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
+            'energia': forms.Select(attrs={'class': 'form-select'}),
         }
 
 
