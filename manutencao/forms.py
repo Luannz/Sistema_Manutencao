@@ -14,7 +14,6 @@ class ChamadoForm(forms.ModelForm):
         widgets = {
             'descricao': forms.Textarea(attrs={'rows': 4, 'class': 'form-control', 'placeholder': 'Descreva o problema...'}),
             'tipo': forms.Select(attrs={'class': 'form-control'}),
-            'equipamento': forms.Select(attrs={'class': 'form-control'}),
             'setor_avulso': forms.Select(attrs={'class': 'form-control'}),
             'prioridade': forms.Select(attrs={'class': 'form-control'}),
             'producao_parada': forms.RadioSelect(choices=[(True, 'Sim'), (False, 'Não')], attrs={'class': 'form-check-input'}),
@@ -36,6 +35,7 @@ class ChamadoForm(forms.ModelForm):
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields['equipamento'].widget.attrs.update({'class': 'form-control'})
         self.fields['equipamento'].queryset = self.fields['equipamento'].queryset.order_by('nome')
         self.fields['equipamento'].label_from_instance = lambda obj: f"{obj.nome} ({obj.codigo})"
 
