@@ -399,7 +399,9 @@ def gerenciar_equipamentos(request):
     equipamentos_list = Equipamento.objects.all().order_by('-id') # Adicionei order_by para os novos aparecerem primeiro
     if busca:
         equipamentos_list = equipamentos_list.filter(
-            Q(nome__icontains=busca) | Q(codigo__icontains=busca)
+            Q(nome__icontains=busca) | 
+            Q(codigo__icontains=busca) |
+            Q(energia__icontains=busca)
         )
     
     # 3. Paginação
