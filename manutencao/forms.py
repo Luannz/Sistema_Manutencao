@@ -35,7 +35,7 @@ class ChamadoForm(forms.ModelForm):
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['equipamento'].widget.attrs.update({'class': 'form-control'})
+        self.fields['equipamento'].widget.attrs.update({'class': 'form-control','id': 'id_equipamento' })
         self.fields['equipamento'].queryset = self.fields['equipamento'].queryset.order_by('nome')
         self.fields['equipamento'].label_from_instance = lambda obj: f"{obj.nome} ({obj.codigo})"
 

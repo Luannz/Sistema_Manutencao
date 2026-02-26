@@ -220,7 +220,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 data.forEach(eq => {
                     const option = document.createElement('option');
                     option.value = eq.id;
-                    option.textContent = eq.nome;
+                    option.textContent = `${eq.nome} (${eq.codigo})`;
                     option.dataset.imagem = eq.imagem || '';
                     equipamentoSelect.appendChild(option);
                 });

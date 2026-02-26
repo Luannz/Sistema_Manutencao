@@ -446,7 +446,7 @@ def editar_equipamento(request, pk):
 
 @login_required
 def get_equipamentos_por_setor(request, setor_id):
-    equipamentos = Equipamento.objects.filter(setor_id=setor_id).values('id', 'nome', 'imagem')
+    equipamentos = Equipamento.objects.filter(setor_id=setor_id).values('id', 'nome','codigo', 'imagem')
     # Converter caminho da imagem para URL completa
     for eq in equipamentos:
         if eq['imagem']:
