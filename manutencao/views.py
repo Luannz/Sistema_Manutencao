@@ -197,7 +197,9 @@ def historicos(request):
     # Filtro de Equipamentos
     if q:
         equipamentos = equipamentos.filter(
-            Q(nome__icontains=q) | Q(codigo__icontains=q)
+            Q(nome__icontains=q) | 
+            Q(codigo__icontains=q) |
+            Q(energia__icontains=q)
         )
     if setor_id:
         equipamentos = equipamentos.filter(setor_id=setor_id)

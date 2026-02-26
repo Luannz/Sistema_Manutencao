@@ -56,7 +56,10 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-start">
                     <div>
-                        <h6 class="mb-1">{{ eq.nome }} | {{eq.codigo}}</h6>
+                        <h6 class="mb-1">
+                            {{ eq.nome }} | {{eq.codigo}} |
+                            <i class="bi bi-lightning-charge-fill text-warning"></i> {{ eq.energia }}  
+                        </h6>
                         <small class="text-muted">
                             <i class="fas fa-industry me-1"></i> {{ eq.setor.nome }}
                         </small>
