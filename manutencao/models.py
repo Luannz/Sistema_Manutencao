@@ -29,12 +29,18 @@ class Usuario(AbstractUser):
         """Retorna True se o usuário for qualquer tipo de mecânico"""
         return self.tipo in ['mecanico', 'mecanico_admin']
 
+class Energia(models.Model):
+    numero = models.CharField(max_length=10, unique=True, verbose_name="Número do Poste/Padrão")
+
+    def __str__(self):
+        return self.numero
 
 class Setor(models.Model):
     nome = models.CharField(max_length=100)
     descricao = models.TextField(blank=True)
     criado_em = models.DateTimeField(auto_now_add=True)
-    
+    energia = models.ForeignKey(Energia, on_delete=models.SET_NULL, null=True, blank=True,verbose_name="Poste/Energia")
+
     class Meta:
         verbose_name = 'Setor'
         verbose_name_plural = 'Setores'
@@ -64,12 +70,6 @@ def caminho_imagem_equipamento(instance, filename):
     
     # Retorna o caminho final dentro da pasta media
     return os.path.join('equipamentos/', novo_nome)
-
-class Energia(models.Model):
-    numero = models.CharField(max_length=10, unique=True, verbose_name="Número do Poste/Padrão")
-
-    def __str__(self):
-        return self.numero
 
 class Equipamento(models.Model):
     nome = models.CharField(max_length=100)
