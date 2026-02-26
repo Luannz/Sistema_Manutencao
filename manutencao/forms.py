@@ -36,6 +36,8 @@ class ChamadoForm(forms.ModelForm):
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields['equipamento'].queryset = self.fields['equipamento'].queryset.order_by('nome')
+        self.fields['equipamento'].label_from_instance = lambda obj: f"{obj.nome} ({obj.codigo})"
 
         if self.instance.pk and self.instance.status == 'concluido':
             for field in self.fields.values():
