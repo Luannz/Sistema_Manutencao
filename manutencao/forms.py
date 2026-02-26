@@ -64,6 +64,5 @@ class EquipamentoForm(forms.ModelForm):
             'codigo': forms.TextInput(attrs={'class': 'form-control'}),
             'descricao': forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
             'imagem': forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*'}),
-            'energia': forms.TextInput(attrs={'class': 'form-control','placeholder': 'Ex: 1220','pattern': '[0-9]*','title': 'Informe apenas os 4 dígitos do padrão'
-            }),
+            'energia': forms.Select(attrs={'class': 'form-select'}),
         }

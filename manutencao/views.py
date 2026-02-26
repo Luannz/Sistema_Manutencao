@@ -7,7 +7,7 @@ from django.core.paginator import Paginator
 from django.utils import timezone
 from django.http import JsonResponse
 from django.db.models import Case, When, Value, IntegerField, Q
-from .models import Usuario, Setor, Equipamento, Chamado, ImagemChamado
+from .models import Usuario, Setor, Equipamento, Chamado, ImagemChamado, Energia
 from .forms import ChamadoForm, SetorForm, EquipamentoForm
 from datetime import datetime, timedelta
 import os
@@ -199,7 +199,7 @@ def historicos(request):
         equipamentos = equipamentos.filter(
             Q(nome__icontains=q) | 
             Q(codigo__icontains=q) |
-            Q(energia__icontains=q)
+            Q(energia__numero__icontains=q)
         )
     if setor_id:
         equipamentos = equipamentos.filter(setor_id=setor_id)
@@ -403,7 +403,7 @@ def gerenciar_equipamentos(request):
         equipamentos_list = equipamentos_list.filter(
             Q(nome__icontains=busca) | 
             Q(codigo__icontains=busca) |
-            Q(energia__icontains=busca)
+            Q(energia__numero__icontains=busca)
         )
     
     # 3. Paginação
@@ -447,6 +447,17 @@ def editar_equipamento(request, pk):
         'total_equipamentos': equipamentos.count(),
         'editando': True # Variável para mudar os textos no HTML
     })
+
+def gerenciar_energia(request):
+    if request.method == 'POST':
+        numero = request.POST.get('numero')
+        if numero:
+            Energia.objects.get_or_create(numero=numero)
+            messages.success(request, "Número de energia cadastrado!")
+            return redirect('gerenciar_energia')
+
+    energias = Energia.objects.all().order_by('numero')
+    return render(request, 'manutencao/gerenciar_energia.html', {'energias': energias})
 
 @login_required
 def get_equipamentos_por_setor(request, setor_id):

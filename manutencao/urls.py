@@ -22,6 +22,7 @@ urlpatterns = [
     path('historicos/setor/<int:setor_id>/', views.historico_setor, name='historico_setor'),
     path('admin-manutencao/', views.dashboard_admin_manutencao, name='dashboard_admin_manutencao'),
     path('chamado/<int:chamado_id>/atribuir/', views.atribuir_chamado, name='atribuir_chamado'),
+    path('energia/gerenciar/', views.gerenciar_energia, name='gerenciar_energia'),
 ]
 
 if settings.DEBUG:

@@ -65,6 +65,12 @@ def caminho_imagem_equipamento(instance, filename):
     # Retorna o caminho final dentro da pasta media
     return os.path.join('equipamentos/', novo_nome)
 
+class Energia(models.Model):
+    numero = models.CharField(max_length=10, unique=True, verbose_name="Número do Poste/Padrão")
+
+    def __str__(self):
+        return self.numero
+
 class Equipamento(models.Model):
     nome = models.CharField(max_length=100)
     setor = models.ForeignKey(Setor, on_delete=models.CASCADE, related_name='equipamentos')
@@ -72,13 +78,7 @@ class Equipamento(models.Model):
     descricao = models.TextField(blank=True)
     imagem = models.ImageField(upload_to=caminho_imagem_equipamento,  validators=[validar_tamanho_imagem], blank=True, null=True, max_length=500)    
     criado_em = models.DateTimeField(auto_now_add=True)
-    energia = models.CharField(
-        max_length=4,
-        validators=[RegexValidator(regex=r'^\d{4}$', message='Informe exatamente 4 dígitos numéricos.')],
-        blank=True, 
-        null=True,
-        verbose_name="Poste/Padrão"
-    )
+    energia = models.ForeignKey(Energia, on_delete=models.SET_NULL, null=True, blank=True,verbose_name="Poste/Energia")
     
     class Meta:
         verbose_name = 'Equipamento'
@@ -269,3 +269,5 @@ class ImagemChamado(models.Model):
     
     def __str__(self):
         return f"Imagem #{self.id} - Chamado #{self.chamado.id}"
+    
+

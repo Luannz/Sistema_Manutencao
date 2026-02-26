@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>⚡ Gerenciar Números de Energia</h2>
+    
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="POST" class="row g-3">
+                {% csrf_token %}
+                <div class="col-auto">
+                    <input type="text" name="numero" class="form-control" placeholder="Ex: 1220" required>
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-primary">Cadastrar Novo</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <h4>Números Cadastrados</h4>
+    <div class="list-group">
+        {% for e in energias %}
+            <div class="list-group-item d-flex justify-content-between align-items-center">
+                <span>⚡ Poste: <strong>{{ e.numero }}</strong></span>
+                <span class="badge bg-info text-dark">{{ e.equipamento_set.count }} equipamentos</span>
+            </div>
+        {% empty %}
+            <p class="text-muted">Nenhum número cadastrado ainda.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

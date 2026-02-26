@@ -1,7 +1,7 @@
 # ==================== ADMIN.PY ====================
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import Usuario, Setor, Equipamento, Chamado, ImagemChamado
+from .models import Usuario, Setor, Equipamento, Chamado, ImagemChamado , Energia
 
 @admin.register(Usuario)
 class UsuarioAdmin(UserAdmin):
@@ -36,3 +36,5 @@ class ChamadoAdmin(admin.ModelAdmin):
 class ImagemChamadoAdmin(admin.ModelAdmin):
     list_display = ['id', 'chamado', 'descricao', 'enviado_em']
     list_filter = ['enviado_em']
+
+admin.site.register(Energia)
