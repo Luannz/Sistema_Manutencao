@@ -353,7 +353,7 @@ def gerenciar_setores(request):
         form = SetorForm()
     
     total_setores = Setor.objects.count()
-    setores = Setor.objects.all()
+    setores = Setor.objects.all().select_related('energia').order_by('nome')
     return render(request, 'manutencao/gerenciar_setores.html', {
         'form': form,
         'setores': setores,
