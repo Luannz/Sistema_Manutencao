@@ -217,12 +217,17 @@ class Chamado(models.Model):
                     if os.path.exists(img_path) and not img_path.lower().endswith('.webp'):
                         img = Image.open(img_path)
 
+                        #Girar a foto que vem girada do celular
+                        img = ImageOps.exif_transpose(img)
+
+                        #aqui ele garante que a imagem seja no modo RGB
+                        if img.mode in ("RGBA", "P"):
+                            img = img.convert("RGB")
+
                         # 2 Redimensionar (Mantendo a proporção)
                         # Se a foto for gigante, limita a largura máxima para 800px
-                        max_width = 800
-                        if img.width > max_width:
-                            output_size = (max_width, int((max_width / img.width) * img.height))
-                            img = img.resize(output_size, Image.LANCZOS)
+                        max_size = (800, 800)
+                        img.thumbnail(max_size, Image.LANCZOS)
 
                         # 3 Converter para WebP em memória
                         temp_thumb = BytesIO()
