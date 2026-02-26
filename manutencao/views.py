@@ -189,7 +189,7 @@ def historicos(request):
         return redirect('dashboard')
     
     setores = Setor.objects.all()
-    equipamentos = Equipamento.objects.all()
+    equipamentos = Equipamento.objects.all().select_related('energia', 'setor__energia')
 
     q = request.GET.get('q') or ''
     setor_id = request.GET.get('setor')
@@ -199,8 +199,9 @@ def historicos(request):
         equipamentos = equipamentos.filter(
             Q(nome__icontains=q) | 
             Q(codigo__icontains=q) |
-            Q(energia__numero__icontains=q)
-        )
+            Q(energia__numero__icontains=q) |
+            Q(setor__energia__numero__icontains=q)
+        ).distinct() # <-- não mostra a mesma maquina duas vezes
     if setor_id:
         equipamentos = equipamentos.filter(setor_id=setor_id)
     
