@@ -107,7 +107,10 @@
                                     <div class="col">
                                         <h6 class="mb-1">{{ equipamento.nome }}</h6>
                                         <p class="mb-1">
+                                            {% if equipamento.codigo %}
                                             <span class="badge bg-secondary">{{ equipamento.codigo }}</span>
+                                            {% endif %}
+                                            
                                             <span class="badge bg-info">{{ equipamento.setor.nome }}</span>
                                             {% if equipamento.energia %}
                                             <span class="badge bg-warning text-dark">

@@ -57,7 +57,12 @@
                 <div class="d-flex justify-content-between align-items-start">
                     <div>
                         <h6 class="mb-1">
-                            {{ eq.nome }} | {{eq.codigo}} 
+                            {{ eq.nome }} 
+
+                            {%if eq.codigo %}
+                                | {{eq.codigo}}
+                            {% endif %} 
+                            
                             {% if eq.energia %}
                                 | <i class="bi bi-lightning-charge-fill text-warning"></i> {{ eq.energia.numero }}
                             {% elif eq.setor and eq.setor.energia %}

@@ -30,6 +30,24 @@
                     <p class="mb-2">
                         <strong>Setor:</strong> {{ chamado.equipamento.setor.nome }}
                     </p>
+
+                    {% if chamado.equipamento.codigo %}
+                        <p class="mb-2">
+                            <strong>Código:</strong> {{ chamado.equipamento.codigo }}
+                        </p>
+                    {% endif %}  
+
+                    <p class="mb-2">
+                        <strong>Energia:</strong> 
+                        {% if chamado.equipamento.energia %}
+                            {{ chamado.equipamento.energia }}
+                        {% elif chamado.equipamento.setor.energia %}
+                            {{ chamado.equipamento.setor.energia }} <small class="text-muted">(Setor)</small>
+                        {% else %}
+                            <span class="text-muted">Não informado</span>
+                        {% endif %}
+                    </p>
+
                     
                     <!-- Imagem do Equipamento -->
                     {% if chamado.equipamento.imagem %}

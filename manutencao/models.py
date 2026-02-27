@@ -74,7 +74,7 @@ def caminho_imagem_equipamento(instance, filename):
 class Equipamento(models.Model):
     nome = models.CharField(max_length=100)
     setor = models.ForeignKey(Setor, on_delete=models.CASCADE, related_name='equipamentos')
-    codigo = models.CharField(max_length=50, unique=True)
+    codigo = models.CharField(max_length=50, unique=False, null=True, blank=True, verbose_name="Código do Equipamento")
     descricao = models.TextField(blank=True)
     imagem = models.ImageField(upload_to=caminho_imagem_equipamento,  validators=[validar_tamanho_imagem], blank=True, null=True, max_length=500)    
     criado_em = models.DateTimeField(auto_now_add=True)
