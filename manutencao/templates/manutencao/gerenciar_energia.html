@@ -24,7 +24,7 @@
     <div class="list-group">
         {% for e in energias %}
             <div class="list-group-item d-flex justify-content-between align-items-center">
-                <span>⚡ Poste: <strong>{{ e.numero }}</strong></span>
+                <span>⚡ Padrão: <strong>{{ e.numero }}</strong></span>
                 <span class="badge bg-info text-dark">{{ e.equipamento_set.count }} equipamentos</span>
             </div>
         {% empty %}
