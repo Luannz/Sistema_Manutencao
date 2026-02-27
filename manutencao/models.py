@@ -74,7 +74,7 @@ def caminho_imagem_equipamento(instance, filename):
 class Equipamento(models.Model):
     nome = models.CharField(max_length=100)
     setor = models.ForeignKey(Setor, on_delete=models.CASCADE, related_name='equipamentos')
-    codigo = models.CharField(max_length=50, unique=False, null=True, blank=True, verbose_name="Código do Equipamento")
+    codigo = models.CharField(max_length=50, unique=True, null=True, blank=True, verbose_name="Código do Equipamento")
     descricao = models.TextField(blank=True)
     imagem = models.ImageField(upload_to=caminho_imagem_equipamento,  validators=[validar_tamanho_imagem], blank=True, null=True, max_length=500)    
     criado_em = models.DateTimeField(auto_now_add=True)
@@ -89,6 +89,8 @@ class Equipamento(models.Model):
         return f"{self.nome} - {self.setor.nome}"
     # --- NOVO MÉTODO SAVE ---
     def save(self, *args, **kwargs):
+        if self.codigo == "":
+            self.codigo = None
         # Verifica se existe uma imagem e se ela é um arquivo novo (evita re-processar o que já está salvo)
         if self.imagem and hasattr(self.imagem, 'file'):
             self.otimizar_imagem()

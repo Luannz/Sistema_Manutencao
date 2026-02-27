@@ -67,3 +67,19 @@ class EquipamentoForm(forms.ModelForm):
             'imagem': forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*'}),
             'energia': forms.Select(attrs={'class': 'form-select'}),
         }
+    def clean_codigo(self):
+        codigo = self.cleaned_data.get('codigo')
+
+        # 1. Se o código estiver vazio (ou for None), não fazemos nada.
+        # O banco permitirá múltiplos NULLs se o campo for null=True.
+        if not codigo:
+            return None
+
+        # 2. Verifica se já existe um equipamento com esse código.
+        # O self.instance ajuda a ignorar o próprio equipamento se estivermos EDITANDO.
+        exists = Equipamento.objects.filter(codigo=codigo).exclude(pk=self.instance.pk).exists()
+        
+        if exists:
+            raise forms.ValidationError("Este código de equipamento já está em uso por outra máquina.")
+        
+        return codigo
