@@ -39,7 +39,7 @@ class Setor(models.Model):
     nome = models.CharField(max_length=100)
     descricao = models.TextField(blank=True)
     criado_em = models.DateTimeField(auto_now_add=True)
-    energia = models.ForeignKey(Energia, on_delete=models.SET_NULL, null=True, blank=True,verbose_name="Poste/Energia")
+    energia = models.ForeignKey(Energia, on_delete=models.PROTECT, verbose_name="Poste/Energia")
 
     class Meta:
         verbose_name = 'Setor'
