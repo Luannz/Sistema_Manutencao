@@ -51,7 +51,7 @@ class SetorForm(forms.ModelForm):
         widgets = {
             'nome': forms.TextInput(attrs={'class': 'form-control'}),
             'descricao': forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
-            'energia': forms.Select(attrs={'class': 'form-select'}),
+            'energia': forms.Select(attrs={'class': 'form-select', 'required': 'required'}),
         }
 
 
