@@ -44,6 +44,8 @@ CSRF_TRUSTED_ORIGINS = [
     'http://192.168.2.244', # 
     'http://localhost',
     'http://127.0.0.1',
+    'https://manutencao.tenislynd.com.br',
+    'http://manutencao.tenislynd.com.br',
 ]
 
 
