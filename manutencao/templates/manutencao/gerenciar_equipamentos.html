@@ -60,7 +60,8 @@
                             </button>
 
                             {% if editando %}
-                                <a href="{% url 'gerenciar_equipamentos' %}" class="btn btn-link w-100 mt-2 text-muted">Cancelar Edição</a>
+                                <a href="{% url 'gerenciar_equipamentos' %}?page={{ request.GET.page }}{% if busca %}&search={{ busca }}{% endif %}" 
+                                    class="btn btn-link w-100 mt-2 text-muted">Cancelar Edição</a>
                             {% endif %}
                         </form>
                     </div>
@@ -120,8 +121,8 @@
                                         </p>
                                     </div>
                                     <div class="col-auto text-end">
-                                        <a href="{% url 'editar_equipamento' equipamento.id %}" class="btn btn-sm btn-outline-primary">
-                                            <i class="fas fa-edit"></i>
+                                        <a href="{% url 'editar_equipamento' equipamento.id %}?page={{ equipamentos.number }}{% if busca %}&search={{ busca }}{% endif %}" 
+                                            class="btn btn-sm btn-outline-primary"> <i class="fas fa-edit"></i>
                                         </a>
                                         <small class="text-muted d-block mt-1" style="font-size: 0.7rem;">
                                             {{ equipamento.criado_em|date:"d/m/Y" }}

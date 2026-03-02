@@ -439,13 +439,25 @@ def editar_equipamento(request, pk):
     else:
         form = EquipamentoForm(instance=equipamento)
 
-    # Pegam a lista novamente para ela não sumir da lateral enquanto editando
-    equipamentos = Equipamento.objects.all().order_by('-criado_em')
+    busca = request.GET.get('search', '')
+    
+    equipamentos_list = Equipamento.objects.all().order_by('-id')
+    if busca:
+        equipamentos_list = equipamentos_list.filter(
+            Q(nome__icontains=busca) | 
+            Q(codigo__icontains=busca) |
+            Q(energia__numero__icontains=busca)
+        )
+
+    paginator = Paginator(equipamentos_list, 10)
+    page_number = request.GET.get('page')
+    equipamentos_paginados = paginator.get_page(page_number)
     
     return render(request, 'manutencao/gerenciar_equipamentos.html', {
         'form': form,
-        'equipamentos': equipamentos,
-        'total_equipamentos': equipamentos.count(),
+        'equipamentos': equipamentos_paginados,
+        'total_equipamentos': equipamentos_list.count(),
+        'busca': busca,
         'editando': True # Variável para mudar os textos no HTML
     })
 
