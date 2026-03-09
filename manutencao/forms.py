@@ -64,7 +64,7 @@ class EquipamentoForm(forms.ModelForm):
             'setor': forms.Select(attrs={'class': 'form-control'}),
             'codigo': forms.TextInput(attrs={'class': 'form-control'}),
             'descricao': forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
-            'imagem': forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*'}),
+            'imagem': forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*','capture': 'environment'}),
             'energia': forms.Select(attrs={'class': 'form-select'}),
         }
     def clean_codigo(self):
