@@ -220,7 +220,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 data.forEach(eq => {
                     const option = document.createElement('option');
                     option.value = eq.id;
-                    option.textContent = `${eq.nome} (${eq.codigo})`;
+
+                    const codExibicao = eq.codigo ? `(${eq.codigo})` : ''; // Se não tiver código, fica vazio
+                    option.textContent = `${eq.nome} ${codExibicao}`;
+
                     option.dataset.imagem = eq.imagem || '';
                     equipamentoSelect.appendChild(option);
                 });
@@ -250,8 +253,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (data.setor_id) {
                     setorSelect.value = data.setor_id;
                     
-                    // --- O PULO DO GATO ---
-                    // Como mudamos o setor via JS, precisamos carregar a lista de 
+                    // --- ---
+                    // Como muda o setor via JS, precisamos carregar a lista de 
                     // equipamentos desse setor para o select não ficar vazio ou incompleto
                     fetch(`/api/equipamentos/setor/${data.setor_id}/`)
                         .then(res => res.json())
@@ -260,7 +263,10 @@ document.addEventListener('DOMContentLoaded', function() {
                             listaEquips.forEach(eq => {
                                 const option = document.createElement('option');
                                 option.value = eq.id;
-                                option.textContent = `${eq.nome} (${eq.codigo})`;
+
+                                const codExibicao = eq.codigo ? `(${eq.codigo})` : '';
+                                option.textContent = `${eq.nome} ${codExibicao}`;
+                                
                                 option.dataset.imagem = eq.imagem || '';
                                 // Mantém selecionado o equipamento do QR Code
                                 if (eq.id == idEquip) option.selected = true;
