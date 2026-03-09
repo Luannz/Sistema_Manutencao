@@ -23,6 +23,9 @@ urlpatterns = [
     path('admin-manutencao/', views.dashboard_admin_manutencao, name='dashboard_admin_manutencao'),
     path('chamado/<int:chamado_id>/atribuir/', views.atribuir_chamado, name='atribuir_chamado'),
     path('energia/gerenciar/', views.gerenciar_energia, name='gerenciar_energia'),
+    path('painel-qr/<int:pk>/', views.painel_qr_equipamento, name='painel_qr'),
+    path('gerenciar/etiquetas/', views.gerador_etiquetas, name='gerador_etiquetas'),
+    path('api/equipamento/detalhes/<int:pk>/', views.api_detalhes_equipamento, name='api_detalhes_equipamento'),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
