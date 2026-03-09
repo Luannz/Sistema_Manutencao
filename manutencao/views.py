@@ -256,6 +256,9 @@ def historico_setor(request, setor_id):
 
 @login_required
 def criar_chamado(request):
+
+    equip_id_vinda_do_qr = request.GET.get('equip_id')
+
     if request.method == 'POST':
         form = ChamadoForm(request.POST, request.FILES)
         if form.is_valid():
@@ -292,7 +295,23 @@ def criar_chamado(request):
         else:
             messages.error(request, "Erro ao criar chamado, Verifique os campos")
     else:
-        form = ChamadoForm()
+        if equip_id_vinda_do_qr:
+            # Busca o equipamento para descobrir o setor dele
+            equipamento = Equipamento.objects.filter(id=equip_id_vinda_do_qr).first()
+            
+            initial_data = {
+                'equipamento': equip_id_vinda_do_qr,
+                'tipo': 'equipamento'
+            }
+            
+            # Se o equipamento existir e tiver setor, passa o ID do setor também
+            if equipamento and equipamento.setor:
+                initial_data['setor_avulso'] = equipamento.setor.id # Verifique se o nome no form é este mesmo
+            
+            form = ChamadoForm(initial=initial_data)
+        else:
+            # Só cria o form vazio se NÃO for QR Code
+            form = ChamadoForm()
     #Deixando os campos mecanicos e setores fora do else pra eles carregarem mesmo se der erro no form    
     mecanicos = Usuario.objects.filter(tipo='mecanico')
     setores = Setor.objects.all()
@@ -480,3 +499,47 @@ def get_equipamentos_por_setor(request, setor_id):
         if eq['imagem']:
             eq['imagem'] = request.build_absolute_uri('/media/' + eq['imagem'])
     return JsonResponse(list(equipamentos), safe=False)
+
+def api_detalhes_equipamento(request, pk):
+    equip = get_object_or_404(Equipamento, pk=pk)
+    return JsonResponse({
+        'id': equip.id,
+        'nome': equip.nome,
+        'setor_id': equip.setor.id if equip.setor else None,
+        'imagem_url': equip.imagem.url if equip.imagem else None,
+        'codigo': equip.codigo
+    })
+
+@login_required
+def painel_qr_equipamento(request, pk):
+    equipamento = get_object_or_404(Equipamento, pk=pk)
+    return render(request, 'manutencao/painel_qr.html', {'equipamento': equipamento})
+
+@login_required
+def gerador_etiquetas(request):
+    # pega o parametro setorr da URL (se n vier nada, traz None)
+    setor_filtrado = request.GET.get('setor')
+    
+    # inicia a query
+    equipamentos = Equipamento.objects.all()
+    
+    # se o usuario escolheu um setor, filtra os resultados
+    if setor_filtrado:
+        equipamentos = equipamentos.filter(setor=setor_filtrado)
+    
+    # pegam todos os setores únicos para preencher o select no HTML
+
+    # .values_list('setor', flat=True) traz uma lista simples de nomes
+    setores = Equipamento.objects.values('setor__id', 'setor__nome').distinct().order_by('setor__nome')
+
+    host = request.get_host() 
+    for eq in equipamentos:
+        eq.link_qr = f"http://{host}/painel-qr/{eq.id}/"
+        
+    context = {
+        'equipamentos': equipamentos,
+        'setores': setores,
+        'setor_selecionado': setor_filtrado
+    }
+        
+    return render(request, 'manutencao/gerador_etiquetas.html', context)

@@ -1,0 +1,53 @@
+{% load qr_code %}
+<style>
+    @media print {
+        .no-print { display: none !important; }
+        .page-break { page-break-after: always; }
+    }
+    .etiqueta-box {
+        border: 2px solid #000;
+        padding: 15px;
+        margin: 10px;
+        width: 250px;
+        display: inline-block;
+        text-align: center;
+        border-radius: 8px;
+    }
+</style>
+
+<div class="container mt-4">
+    <div class="no-print mb-4 alert alert-info">
+        <h4>🖨️ Central de Etiquetas</h4>
+        <p>Filtre por setor para facilitar a organização física.</p>
+
+        <form method="GET" class="row g-3 align-items-center">
+            <div class="col-auto">
+                <select name="setor" class="form-select" onchange="this.form.submit()">
+                    <option value="">-- Todos os Setores --</option>
+                    {% for s in setores %}
+                        <option value="{{ s.setor__id }}" {% if s.setor__id == setor_selecionado %}selected{% endif %}>
+                            {{ s.setor__nome|upper }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-auto">
+                <a href="{% url 'gerador_etiquetas' %}" class="btn btn-outline-secondary">Limpar Filtros</a>
+                <button onclick="window.print()" type="button" class="btn btn-dark ms-2">🖨️ Imprimir Todas</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="row">
+        {% for eq in equipamentos %}
+        <div class="etiqueta-box">
+            <strong>{{ eq.nome|upper }}</strong><br>
+            <small>{{ eq.codigo|default:"---" }}</small>
+            <hr>
+            {% qr_from_text eq.link_qr size="M" %}
+            <hr>
+            <small>MANUTENÇÃO LYND</small>
+        </div>
+        {% endfor %}
+    </div>
+</div>

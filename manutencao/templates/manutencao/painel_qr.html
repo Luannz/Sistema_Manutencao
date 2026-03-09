@@ -1,0 +1,26 @@
+{% extends "manutencao/base.html" %}
+{% block content %}
+<div class="container mt-4 text-center">
+    <div class="card shadow-lg border-primary">
+        <div class="card-header bg-primary text-white">
+            <h2 class="mb-0">{{ equipamento.nome }}</h2>
+            <small>CÓDIGO: {{ equipamento.codigo|default:"Sem Patrimônio" }}</small>
+        </div>
+        <div class="card-body py-5">
+            <div class="d-grid gap-4">
+                <a href="{% url 'criar_chamado' %}?equip_id={{ equipamento.id }}" 
+                   class="btn btn-danger btn-lg p-4 shadow">
+                   <i class="fas fa-exclamation-triangle"></i> 
+                   <strong class="d-block mt-2">ABRIR NOVO CHAMADO</strong>
+                </a>
+
+                <a href="{% url 'historico_equipamento' equipamento.id %}" 
+                   class="btn btn-outline-primary btn-lg p-4">
+                   <i class="fas fa-list-ul"></i> 
+                   <strong class="d-block mt-2">VER HISTÓRICO DA MÁQUINA</strong>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

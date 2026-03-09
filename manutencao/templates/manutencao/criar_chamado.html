@@ -196,7 +196,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (tipo === 'equipamento') {
             divEquipamento.style.display = 'block';
-            setorAvulsoInput.value = '';
+            // setorAvulsoInput.value = '';
         } else {
             divEquipamento.style.display = 'none';
             setorAvulsoInput.value = setorSelect.value;
@@ -239,6 +239,43 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     tipoSelect.addEventListener('change', toggleCampos);
+
+    // --- LÓGICA PARA TRATAR DADOS VINDOS DO QR CODE ---
+    if (equipamentoSelect.value && tipoSelect.value === 'equipamento') {
+        const idEquip = equipamentoSelect.value;
+        
+        fetch(`/api/equipamento/detalhes/${idEquip}/`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.setor_id) {
+                    setorSelect.value = data.setor_id;
+                    
+                    // --- O PULO DO GATO ---
+                    // Como mudamos o setor via JS, precisamos carregar a lista de 
+                    // equipamentos desse setor para o select não ficar vazio ou incompleto
+                    fetch(`/api/equipamentos/setor/${data.setor_id}/`)
+                        .then(res => res.json())
+                        .then(listaEquips => {
+                            equipamentoSelect.innerHTML = '<option value="">Selecione um equipamento...</option>';
+                            listaEquips.forEach(eq => {
+                                const option = document.createElement('option');
+                                option.value = eq.id;
+                                option.textContent = `${eq.nome} (${eq.codigo})`;
+                                option.dataset.imagem = eq.imagem || '';
+                                // Mantém selecionado o equipamento do QR Code
+                                if (eq.id == idEquip) option.selected = true;
+                                equipamentoSelect.appendChild(option);
+                            });
+                        });
+                }
+                
+                if (data.imagem_url) {
+                    imgEquipamento.src = data.imagem_url;
+                    previewEquipamento.style.display = 'block';
+                }
+            })
+            .catch(err => console.log("Erro ao buscar detalhes do equipamento:", err));
+    }
     toggleCampos();
 });
 </script>

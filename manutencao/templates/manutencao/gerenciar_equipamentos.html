@@ -75,9 +75,14 @@
                             <span>
                                 <i class="fas fa-list me-2"></i>Equipamentos Cadastrados
                             </span>
-                            <span class="badge bg-secondary">
-                                {{ total_equipamentos }} Total
-                            </span>
+                            <div>
+                                <a href="{% url 'gerador_etiquetas' %}" class="btn btn-sm btn-dark me-2">
+                                    <i class="fas fa-print me-1"></i>Imprimir Etiquetas
+                                </a>
+                                <span class="badge bg-secondary">
+                                    {{ total_equipamentos }} Total
+                                </span>
+                            </div>
                         </h5>
 
                         <form method="GET" class="mb-3">
@@ -121,9 +126,17 @@
                                         </p>
                                     </div>
                                     <div class="col-auto text-end">
-                                        <a href="{% url 'editar_equipamento' equipamento.id %}?page={{ equipamentos.number }}{% if busca %}&search={{ busca }}{% endif %}" 
-                                            class="btn btn-sm btn-outline-primary"> <i class="fas fa-edit"></i>
+                                        <a href="{% url 'painel_qr' equipamento.id %}" 
+                                        class="btn btn-sm btn-outline-dark" 
+                                        title="Ver QR Code">
+                                            <i class="fas fa-qrcode"></i>
                                         </a>
+
+                                        <a href="{% url 'editar_equipamento' equipamento.id %}?page={{ equipamentos.number }}{% if busca %}&search={{ busca }}{% endif %}" 
+                                        class="btn btn-sm btn-outline-primary"> 
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        
                                         <small class="text-muted d-block mt-1" style="font-size: 0.7rem;">
                                             {{ equipamento.criado_em|date:"d/m/Y" }}
                                         </small>
