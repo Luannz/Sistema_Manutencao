@@ -135,7 +135,7 @@ document.addEventListener('DOMContentLoaded', function() {
         div.className = 'item-imagem mb-3';
         div.innerHTML = `
             <div class="input-group">
-                <input type="file" name="imagens" class="form-control input-foto" accept="image/*">
+                <input type="file" name="imagens" class="form-control input-foto" accept="image/*" capture="environment">
                 <button type="button" class="btn btn-outline-danger btn-remover">
                     <i class="fas fa-trash"></i>
                 </button>
