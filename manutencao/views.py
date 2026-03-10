@@ -289,7 +289,7 @@ def criar_chamado(request):
             messages.success(request, "Chamado criado com sucesso!")
 
             if request.user.tipo == 'mecanico_admin':
-                return redirect('solicitante_dashboard')
+                return redirect('mecanico_dashboard')
             return redirect('solicitante_dashboard')
 
         else:
