@@ -89,6 +89,10 @@
                 {% if chamado.status == 'concluido' %}
                     <p class="small mb-1">
                         <i class="fas fa-stopwatch me-1"></i>
+                        <strong>Tempo de Execução:</strong> {{ chamado.tempo_execucao_formatado }}
+                    </p>
+                    <p class="small mb-1">
+                        <i class="fas fa-clock me-1"></i>
                         <strong>Ficou aberto por:</strong> {{ chamado.tempo_aberto_formatado }}
                     </p>
                     <p class="small mb-2">
