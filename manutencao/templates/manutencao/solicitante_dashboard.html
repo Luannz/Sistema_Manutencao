@@ -101,6 +101,12 @@
                         <strong>Aberto há:</strong> {{ chamado.tempo_aberto_formatado }}
                     </p>
                 {% endif %}
+                {% if chamado.concluido_por %}
+                    <p class="small mb-2">
+                        <i class="fas fa-user-check text-success me-1"></i>
+                        <strong>Concluído por:</strong> {{ chamado.concluido_por.username }}
+                    </p>
+                    {% endif %}
 
                 <hr class="my-2 opacity-25">
 

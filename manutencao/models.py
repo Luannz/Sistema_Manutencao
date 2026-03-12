@@ -159,7 +159,8 @@ class Chamado(models.Model):
     atualizado_em = models.DateTimeField(auto_now=True)
     iniciado_em = models.DateTimeField(null=True, blank=True)
     concluido_em = models.DateTimeField(null=True, blank=True)
-    
+    concluido_por = models.ForeignKey(Usuario,on_delete=models.SET_NULL, null=True, blank=True, related_name='chamados_concluidos')
+
     observacoes_mecanico = models.TextField(blank=True)
     
     class Meta:

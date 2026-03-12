@@ -342,8 +342,10 @@ def atualizar_status(request, chamado_id):
             
             if novo_status == 'em_progresso' and not chamado.iniciado_em:
                 chamado.iniciado_em = timezone.now()
-            elif novo_status == 'concluido' and not chamado.concluido_em:
-                chamado.concluido_em = timezone.now()
+            elif novo_status == 'concluido':
+                if not chamado.concluido_em:
+                    chamado.concluido_em = timezone.now()
+                chamado.concluido_por = request.user
             
             if observacoes:
                 chamado.observacoes_mecanico = observacoes
