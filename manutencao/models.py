@@ -210,7 +210,35 @@ class Chamado(models.Model):
             return f"{horas}h {minutos}min"
         else:
             return f"{minutos}min"
+    
+    def tempo_execucao_formatado(self):
+        """
+        Retorna apenas o tempo em que o mecânico esteve trabalhando no chamado
+        (de 'em_progresso' até 'concluido')
+        """
+        if not self.iniciado_em:
+            return "Não iniciado"
         
+        # Se concluido, usa a data de conclusao, Se ainda em progresso, usa o agora
+        fim = self.concluido_em or timezone.now()
+        delta = fim - self.iniciado_em
+
+        total_segundos = int(delta.total_seconds())
+        if total_segundos < 0: total_segundos = 0 
+        
+        horas, resto = divmod(total_segundos, 3600)
+        minutos, segundos = divmod(resto, 60)
+        dias, horas = divmod(horas, 24)
+
+        if dias > 0:
+            return f"{dias}d {horas}h"
+        elif horas > 0:
+            return f"{horas}h {minutos}min"
+        elif minutos > 0:
+            return f"{minutos}min"
+        else:
+            return f"{segundos}seg"
+
     def save(self, *args, **kwargs):
     # salva o chamado primeiro
         super().save(*args, **kwargs)
