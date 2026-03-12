@@ -43,7 +43,10 @@
                 <strong>Problema:</strong><br>
                 {{ chamado.descricao }}
             </p>
-
+            <p class="small mb-2">
+                <i class="fas fa-user-check text-success me-1"></i>
+                <strong>Concluído por:</strong> {{ chamado.concluido_por.username }}
+            </p>
             <!-- Imagens do Problema -->
             {% if chamado.imagens.exists %}
             <div class="my-3">
