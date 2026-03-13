@@ -16,7 +16,8 @@ class Usuario(AbstractUser):
     TIPO_CHOICES = [
         ('solicitante', 'Solicitante'),
         ('mecanico', 'Mecânico'),
-        ('mecanico_admin', 'Mecânico Admin')
+        ('mecanico_admin', 'Mecânico Admin'),
+        ('solicitante_admin', 'Solicitante Admin'),
     ]
     tipo = models.CharField(max_length=20, choices=TIPO_CHOICES)
     telefone = models.CharField(max_length=15, blank=True)
