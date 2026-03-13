@@ -87,13 +87,13 @@
         </div>
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-sm table-hover">
+                <table class="table table-sm table-hover align-middle">
                     <thead>
                         <tr>
                             <th>#</th>
                             <th>Equipamento/Setor</th>
                             <th>Mecânicos Designados</th>
-                            <th>Status</th>
+                            <th class="text-center">Status</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -115,25 +115,24 @@
                                     <span class="text-muted small">Não atribuído</span>
                                 {% endfor %}
                             </td>
-                            <td><span class="badge bg-success">Já Designado</span></td>
+                            <td class="text-center"><span class="badge bg-success">Em Execução</span></td>
                         </tr>
                         {% empty %}
-                        <tr><td colspan="4" class="text-center text-muted">Nenhum serviço em andamento.</td></tr>
+                        <tr><td colspan="4" class="text-center py-3 text-muted">Nenhum serviço em andamento.</td></tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
 
             {% if total_andamento > 10 %}
-            <div class="text-center mt-2 border-top pt-2">
-                <a href="{% url 'historicos' %}" class="btn btn-sm btn-link text-decoration-none">
-                    <i class="fas fa-external-link-alt me-1"></i>Ver histórico completo
+            <div class="text-center mt-3 border-top pt-2">
+                <a href="{% url 'historicos' %}" class="btn btn-sm btn-outline-info">
+                    <i class="fas fa-history me-1"></i> Ver todos os {{ total_andamento }} serviços em andamento
                 </a>
             </div>
             {% endif %}
         </div>
     </div>
-</div>
 
 {% for chamado in chamados_novos %}
 <div class="modal fade" id="modalDesignar{{ chamado.id }}" tabindex="-1" aria-hidden="true">
