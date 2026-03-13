@@ -108,7 +108,7 @@ def dashboard_admin_manutencao(request):
 
 @login_required
 def atribuir_chamado(request, chamado_id):
-    if request.user.tipo != 'mecanico_admin':
+    if request.user.tipo not in ['mecanico_admin', 'solicitante_admin']:
         return redirect('dashboard')
         
     chamado = get_object_or_404(Chamado, id=chamado_id)
