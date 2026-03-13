@@ -80,45 +80,61 @@
 
     <div class="card shadow-sm border-info">
         <div class="card-header bg-info bg-opacity-10 text-dark fw-bold d-flex justify-content-between align-items-center">
-            <span><i class="fas fa-tools me-2"></i>Serviços em Andamento</span>
+            <span><i class="fas fa-running me-2"></i>Serviços em Execução</span>
             <span class="badge bg-info text-dark border border-info" style="font-size: 0.75rem;">
-                Exibindo {{ chamados_em_andamento|length }} de {{ total_andamento }}
+                Ativos: {{ chamados_em_andamento|length }}
             </span>
         </div>
         <div class="card-body">
             <div class="table-responsive">
                 <table class="table table-sm table-hover align-middle">
-                    <thead>
+                    <thead class="table-light">
                         <tr>
                             <th>#</th>
-                            <th>Equipamento/Setor</th>
-                            <th>Mecânicos Designados</th>
-                            <th class="text-center">Status</th>
+                            <th>Equipamento / Setor</th>
+                            <th>Equipe Designada</th>
+                            <th>Início da Manutenção</th>
+                            <th class="text-center">Status Atual</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for chamado in chamados_em_andamento %}
                         <tr>
-                            <td>{{ chamado.id }}</td>
+                            <td><span class="text-muted fw-bold">#{{ chamado.id }}</span></td>
                             <td>
                                 {% if chamado.tipo == 'equipamento' %}
-                                    <i class="fas fa-cog text-muted me-1"></i> <strong>{{ chamado.equipamento.nome }}</strong>
+                                    <i class="fas fa-cog text-primary me-1"></i> <strong>{{ chamado.equipamento.nome }}</strong>
                                 {% else %}
-                                    <i class="fas fa-building text-muted me-1"></i> <span class="badge bg-light text-dark border" style="font-size: 0.7rem;">AVULSO</span>
+                                    <i class="fas fa-building text-secondary me-1"></i> <span class="badge bg-light text-dark border" style="font-size: 0.7rem;">AVULSO</span>
                                 {% endif %}
                                 <br><small class="text-muted">{{ chamado.nome_setor }}</small>
                             </td>
                             <td>
                                 {% for mec in chamado.mecanicos.all %}
-                                    <span class="badge bg-light text-dark border">{{ mec.username }}</span>
+                                    <span class="badge bg-white text-dark border shadow-sm mb-1">
+                                        <i class="fas fa-user-wrench me-1 text-info"></i>{{ mec.username }}
+                                    </span>
                                 {% empty %}
-                                    <span class="text-muted small">Não atribuído</span>
+                                    <span class="text-danger small"><i class="fas fa-exclamation-circle me-1"></i>Sem equipe</span>
                                 {% endfor %}
                             </td>
-                            <td class="text-center"><span class="badge bg-success">Em Execução</span></td>
+                            <td>
+                                <small class="text-muted">
+                                    <i class="far fa-clock me-1"></i>{{ chamado.criado_em|date:"d/m H:i" }}
+                                </small>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge rounded-pill bg-success px-3">
+                                    <i class="fas fa-spinner fa-spin me-1"></i> Em Execução
+                                </span>
+                            </td>
                         </tr>
                         {% empty %}
-                        <tr><td colspan="4" class="text-center py-3 text-muted">Nenhum serviço em andamento.</td></tr>
+                        <tr>
+                            <td colspan="5" class="text-center py-4 text-muted">
+                                <i class="fas fa-info-circle me-1"></i> Não há mecânicos com chamados abertos no momento.
+                            </td>
+                        </tr>
                         {% endfor %}
                     </tbody>
                 </table>
@@ -126,8 +142,8 @@
 
             {% if total_andamento > 10 %}
             <div class="text-center mt-3 border-top pt-2">
-                <a href="{% url 'historicos' %}" class="btn btn-sm btn-outline-info">
-                    <i class="fas fa-history me-1"></i> Ver todos os {{ total_andamento }} serviços em andamento
+                <a href="{% url 'historicos' %}" class="btn btn-sm btn-link text-info text-decoration-none fw-bold">
+                    <i class="fas fa-plus-circle me-1"></i> Ver todos os {{ total_andamento }} serviços designados
                 </a>
             </div>
             {% endif %}
