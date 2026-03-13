@@ -87,23 +87,28 @@ def dashboard_admin_manutencao(request):
     chamados_novos = Chamado.objects.filter(mecanicos__isnull=True).order_by('-criado_em')
     
     # 2 Chamados EM ANDAMENTO (ja designados)
-    chamados_em_andamento = Chamado.objects.filter(mecanicos__isnull=False)\
-    .select_related('equipamento', 'equipamento__setor', 'setor_avulso')\
-    .prefetch_related('mecanicos')\
-    .distinct()
+    queryset_andamento = Chamado.objects.filter(mecanicos__isnull=False, status='aberto')\
+        .select_related('equipamento', 'equipamento__setor', 'setor_avulso')\
+        .prefetch_related('mecanicos')\
+        .order_by('-criado_em')\
+        .distinct()
+    
+    total_andamento = queryset_andamento.count()
+    chamados_em_andamento = queryset_andamento[:10]
     
     # 3 Dados auxiliares para o dashboard
     mecanicos = Usuario.objects.filter(tipo__in=['mecanico', 'mecanico_admin'])
     setores = Setor.objects.all()
     equipamentos = Equipamento.objects.all()
-    chamados_em_andamento = chamados_em_andamento[:10]
+    
     
     return render(request, 'manutencao/admin_dashboard.html', {
         'chamados_novos': chamados_novos,
         'chamados_em_andamento': chamados_em_andamento,
         'mecanicos': mecanicos,
         'setores': setores,
-        'equipamentos': equipamentos
+        'equipamentos': equipamentos,
+        'total_andamento': total_andamento
     })
 
 @login_required
