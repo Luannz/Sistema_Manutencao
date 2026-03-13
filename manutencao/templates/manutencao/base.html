@@ -164,6 +164,8 @@
                                 <i class='fas fa-bolt me-1'></i> ENERGIA
                             </a>
                         </li>
+                    {% endif %}
+                    {% if user.tipo == 'mecanico_admin' or user.tipo == 'solicitante_admin' %}
                         <li class='nav-item me-2'>
                             <a class='nav-link' href="{% url 'dashboard_admin_manutencao'%}">
                                 <i class='fas fa-user-shield me-1'></i> ADMIN

@@ -35,12 +35,12 @@ def logout_view(request):
 
 @login_required
 def dashboard(request):
-    if request.user.tipo == 'mecanico_admin':
+    if request.user.tipo in ['mecanico_admin', 'mecanico']:
         return redirect('mecanico_dashboard')
-    elif request.user.tipo == 'mecanico':
-        return redirect('mecanico_dashboard')
-    else:
+    # Se não for mecânico, trata como solicitante
+    else: 
         return redirect('solicitante_dashboard')
+    
 
 
 @login_required
@@ -80,7 +80,7 @@ def solicitante_dashboard(request):
 
 @login_required
 def dashboard_admin_manutencao(request):
-    if request.user.tipo != 'mecanico_admin':
+    if request.user.tipo not in ['mecanico_admin', 'solicitante_admin']:
         return redirect('dashboard')
     
     # 1 Chamados NOVOS (Aguardando designacao)
