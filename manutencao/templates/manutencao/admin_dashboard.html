@@ -78,7 +78,7 @@
         </div>
     </div>
 
-    <div class="card shadow-sm border-info">
+     <div class="card shadow-sm border-info">
         <div class="card-header bg-info bg-opacity-10 text-dark fw-bold">
             <i class="fas fa-tools me-2"></i>Serviços em Andamento
         </div>
@@ -120,14 +120,6 @@
                     </tbody>
                 </table>
             </div>
-
-            {% if total_andamento > 10 %}
-            <div class="text-center mt-2 border-top pt-2">
-                <a href="{% url 'historicos' %}" class="btn btn-sm btn-link text-decoration-none">
-                    <i class="fas fa-external-link-alt me-1"></i>Ver histórico completo
-                </a>
-            </div>
-            {% endif %}
         </div>
     </div>
 
