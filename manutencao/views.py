@@ -193,37 +193,44 @@ def historicos(request):
     q = request.GET.get('q') or ''
     setor_id = request.GET.get('setor')
 
-    # Anota a data do ultimo chamado concluído em cada equipamento
+    # 1. Pegamos a data de CRIAÇÃO do chamado mais recente (independente de status)
     equipamentos = equipamentos.annotate(
-        data_ultima_manutencao=Max('chamado__concluido_em', filter=Q(chamado__status='concluido'))
+        ultima_atividade=Max('chamado__criado_em')
     )
 
-    # Filtro de Equipamentos
     if q:
         equipamentos = equipamentos.filter(
             Q(nome__icontains=q) | 
             Q(codigo__icontains=q) |
             Q(energia__numero__icontains=q) |
             Q(setor__energia__numero__icontains=q)
-        ).distinct() # <-- não mostra a mesma maquina duas vezes
+        ).distinct()
+
     if setor_id:
         equipamentos = equipamentos.filter(setor_id=setor_id)
     
-    # limita o tanto de chamado que vai mostrar e só limita o setor se nao tiver nenhum selecionado
-    equipamentos = equipamentos.order_by('-data_ultima_manutencao')[:10]
-    # Anotam a data do último chamado avulso concluído no setor
-    setores = setores.annotate(data_ultimo_avulso=Max('chamado__concluido_em', filter=Q(chamado__status='concluido', chamado__tipo='avulso'))
+    # 2. Ordenamos pela atividade mais recente (quem teve chamado hoje aparece primeiro)
+    # Usamos F() com nulls_last para garantir que quem nunca teve chamado fique por último
+    from django.db.models import F
+    equipamentos = equipamentos.order_by(F('ultima_atividade').desc(nulls_last=True))[:10]
+
+    # --- SETORES (Mesma lógica para os avulsos) ---
+    setores = setores.annotate(
+        ultima_atividade_avulso=Max('chamado__criado_em', filter=Q(chamado__tipo='avulso'))
     )
+
     if setor_id:
         setores = setores.filter(id=setor_id)
-    setores = setores.order_by('-data_ultimo_avulso')[:10]
     
-    # Preenche os objetos para o template (como você já fazia, mas agora nos itens certos)
+    setores = setores.order_by(F('ultima_atividade_avulso').desc(nulls_last=True))[:10]
+    
+    # --- PREENCHIMENTO PARA O TEMPLATE ---
     for eq in equipamentos:
-        eq.ultimo_chamado = Chamado.objects.filter(equipamento=eq, status='concluido').order_by('-concluido_em').first()
+        # Aqui pegamos o último chamado QUALQUER para mostrar no card
+        eq.ultimo_chamado = Chamado.objects.filter(equipamento=eq).order_by('-criado_em').first()
 
     for st in setores:
-        st.ultimo_avulso = Chamado.objects.filter(setor_avulso=st, tipo='avulso', status='concluido').order_by('-concluido_em').first()
+        st.ultimo_avulso = Chamado.objects.filter(setor_avulso=st, tipo='avulso').order_by('-criado_em').first()
 
     return render(request, 'manutencao/historicos.html', {
         'equipamentos': equipamentos,
