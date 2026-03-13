@@ -87,7 +87,7 @@ def dashboard_admin_manutencao(request):
     chamados_novos = Chamado.objects.filter(mecanicos__isnull=True).order_by('-criado_em')
     
     # 2 Chamados EM ANDAMENTO (ja designados)
-    queryset_andamento = Chamado.objects.filter(mecanicos__isnull=False, status='aberto')\
+    queryset_andamento = Chamado.objects.filter(mecanicos__isnull=False)\
         .select_related('equipamento', 'equipamento__setor', 'setor_avulso')\
         .prefetch_related('mecanicos')\
         .order_by('-criado_em')\
