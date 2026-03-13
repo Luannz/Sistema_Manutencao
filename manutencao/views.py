@@ -45,7 +45,7 @@ def dashboard(request):
 
 @login_required
 def solicitante_dashboard(request):
-    if request.user.tipo != 'solicitante':
+    if request.user.tipo not in ['solicitante', 'solicitante_admin']:
         return redirect('dashboard')
     
     #Pega a lista base 
