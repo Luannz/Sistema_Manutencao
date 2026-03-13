@@ -6,7 +6,7 @@ from django.contrib import messages
 from django.core.paginator import Paginator
 from django.utils import timezone
 from django.http import JsonResponse
-from django.db.models import Case, When, Value, IntegerField, Q
+from django.db.models import Case, When, Value, IntegerField, Q , Max
 from .models import Usuario, Setor, Equipamento, Chamado, ImagemChamado, Energia
 from .forms import ChamadoForm, SetorForm, EquipamentoForm
 from datetime import datetime, timedelta
@@ -190,9 +190,13 @@ def historicos(request):
     
     setores = Setor.objects.all()
     equipamentos = Equipamento.objects.all().select_related('energia', 'setor__energia')
-
     q = request.GET.get('q') or ''
     setor_id = request.GET.get('setor')
+
+    # Anota a data do ultimo chamado concluído em cada equipamento
+    equipamentos = equipamentos.annotate(
+        data_ultima_manutencao=Max('chamados__concluido_em', filter=Q(chamados__status='concluido'))
+    )
 
     # Filtro de Equipamentos
     if q:
@@ -206,22 +210,21 @@ def historicos(request):
         equipamentos = equipamentos.filter(setor_id=setor_id)
     
     # limita o tanto de chamado que vai mostrar e só limita o setor se nao tiver nenhum selecionado
-    equipamentos = equipamentos[:10]
-    if not setor_id:
-        setores = setores[:10]
-
-    #Anexa último chamado ao EQUIPAMENTO
+    equipamentos = equipamentos.order_by('-data_ultima_manutencao')[:10]
+    # Anotam a data do último chamado avulso concluído no setor
+    setores = setores.annotate(
+        data_ultimo_avulso=Max('chamados_avulsos__concluido_em', filter=Q(chamados_avulsos__status='concluido', chamados_avulsos__tipo='avulso'))
+    )
+    if setor_id:
+        setores = setores.filter(id=setor_id)
+    setores = setores.order_by('-data_ultimo_avulso')[:10]
+    
+    # Preenche os objetos para o template (como você já fazia, mas agora nos itens certos)
     for eq in equipamentos:
-        eq.ultimo_chamado = Chamado.objects.filter(
-            equipamento=eq, status='concluido'
-        ).order_by('-concluido_em').first()
+        eq.ultimo_chamado = Chamado.objects.filter(equipamento=eq, status='concluido').order_by('-concluido_em').first()
 
-    #Anexa ultimo chamado AVULSO ao SETOR
-    #permite ver a última manutenção predial/infra do setor
     for st in setores:
-        st.ultimo_avulso = Chamado.objects.filter(
-            setor_avulso=st, tipo='avulso', status='concluido'
-        ).order_by('-concluido_em').first()
+        st.ultimo_avulso = Chamado.objects.filter(setor_avulso=st, tipo='avulso', status='concluido').order_by('-concluido_em').first()
 
     return render(request, 'manutencao/historicos.html', {
         'equipamentos': equipamentos,
