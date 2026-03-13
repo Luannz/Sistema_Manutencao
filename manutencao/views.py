@@ -195,7 +195,7 @@ def historicos(request):
 
     # Anota a data do ultimo chamado concluído em cada equipamento
     equipamentos = equipamentos.annotate(
-        data_ultima_manutencao=Max('chamados__concluido_em', filter=Q(chamados__status='concluido'))
+        data_ultima_manutencao=Max('chamado__concluido_em', filter=Q(chamados__status='concluido'))
     )
 
     # Filtro de Equipamentos
@@ -213,7 +213,7 @@ def historicos(request):
     equipamentos = equipamentos.order_by('-data_ultima_manutencao')[:10]
     # Anotam a data do último chamado avulso concluído no setor
     setores = setores.annotate(
-        data_ultimo_avulso=Max('chamados_avulsos__concluido_em', filter=Q(chamados_avulsos__status='concluido', chamados_avulsos__tipo='avulso'))
+        data_ultimo_avulso=Max('chamado_avulsos__concluido_em', filter=Q(chamados_avulsos__status='concluido', chamados_avulsos__tipo='avulso'))
     )
     if setor_id:
         setores = setores.filter(id=setor_id)
