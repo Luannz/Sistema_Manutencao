@@ -58,7 +58,9 @@
                     </div>
 
                     {% if eq.ultimo_chamado %}
-                        <span class="badge bg-success">Última em {{ eq.ultimo_chamado.concluido_em|date:"d/m/Y" }}</span>
+                        <span class="badge {% if eq.ultimo_chamado.status == 'concluido' %}bg-success{% elif eq.ultimo_chamado.status == 'aberto' %}bg-danger{% else %}bg-warning{% endif %}">
+                            {{ eq.ultimo_chamado.get_status_display }} em {{ eq.ultimo_chamado.criado_em|date:"d/m/Y" }}
+                        </span>
                     {% else %}
                         <span class="badge bg-secondary">Sem histórico</span>
                     {% endif %}
