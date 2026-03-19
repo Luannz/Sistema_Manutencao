@@ -58,7 +58,16 @@
                     </div>
 
                     {% if eq.ultimo_chamado %}
-                        <span class="badge {% if eq.ultimo_chamado.status == 'concluido' %}bg-success{% elif eq.ultimo_chamado.status == 'aberto' %}bg-danger{% else %}bg-warning{% endif %}">
+                        <span class="badge 
+                            {% if eq.ultimo_chamado.status == 'concluido' %}
+                                bg-success
+                            {% elif eq.ultimo_chamado.status == 'em_progresso' %}
+                                bg-primary
+                            {% elif eq.ultimo_chamado.status == 'pendente' %}
+                                bg-warning text-dark
+                            {% else %}
+                                bg-secondary
+                            {% endif %}">
                             {{ eq.ultimo_chamado.get_status_display }} em {{ eq.ultimo_chamado.criado_em|date:"d/m/Y" }}
                         </span>
                     {% else %}
