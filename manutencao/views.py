@@ -142,8 +142,8 @@ def mecanico_dashboard(request):
     
     # --- LÓGICA DE PERMISSÃO ---
     if request.user.tipo == 'mecanico_admin':
-        # Admin vê TUDO (removendo o filtro de mecanicos=request.user)
-        chamados_list = Chamado.objects.all()
+        # Admin vê TUDO que ja tenha mecanicos atribuidos (removendo o filtro de mecanicos=request.user)
+        chamados_list = Chamado.objects.filter(mecanicos__isnull=False).distinct() # Garante que só traga chamados com mecanicos atribuidos
     else:
         # Mecânico comum vê apenas os dele
         chamados_list = Chamado.objects.filter(mecanicos=request.user)
