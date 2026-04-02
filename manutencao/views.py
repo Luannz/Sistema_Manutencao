@@ -6,7 +6,7 @@ from django.contrib import messages
 from django.core.paginator import Paginator
 from django.utils import timezone
 from django.http import JsonResponse
-from django.db.models import Case, When, Value, IntegerField, Q , Max
+from django.db.models import Case, When, Value, IntegerField, Q , Max, F
 from .models import Usuario, Setor, Equipamento, Chamado, ImagemChamado, Energia
 from .forms import ChamadoForm, SetorForm, EquipamentoForm
 from datetime import datetime, timedelta
@@ -193,14 +193,25 @@ def historicos(request):
     if not request.user.is_manutencao:
         return redirect('dashboard')
     
+    # Captura dos filtros do GET
+    lista_todos_setores = Setor.objects.all().order_by('nome')
     setores = Setor.objects.all()
     equipamentos = Equipamento.objects.all().select_related('energia', 'setor__energia')
     q = request.GET.get('q') or ''
     setor_id = request.GET.get('setor')
+    status_filtro = request.GET.get('status')
 
-    # 1. Pegamos a data de CRIAÇÃO do chamado mais recente (independente de status)
+    # Se houver filtro de status
+    filtro_status_eq = Q(chamado__isnull=False)
+    filtro_status_st = Q(chamado__tipo='avulso')
+
+    if status_filtro:
+        filtro_status_eq &= Q(chamado__status=status_filtro)
+        filtro_status_st &= Q(chamado__status=status_filtro)
+
+    # 1. Anotações com filtro de status
     equipamentos = equipamentos.annotate(
-        ultima_atividade=Max('chamado__criado_em')
+        ultima_atividade=Max('chamado__criado_em', filter=filtro_status_eq)
     )
 
     if q:
@@ -213,10 +224,10 @@ def historicos(request):
 
     if setor_id:
         equipamentos = equipamentos.filter(setor_id=setor_id)
-    
+    if status_filtro:
+        equipamentos = equipamentos.filter(ultima_atividade__isnull=False)
     # 2. Ordenamos pela atividade mais recente (quem teve chamado hoje aparece primeiro)
     # Usamos F() com nulls_last para garantir que quem nunca teve chamado fique por último
-    from django.db.models import F
     equipamentos = equipamentos.order_by(F('ultima_atividade').desc(nulls_last=True))[:10]
 
     # --- SETORES (Mesma lógica para os avulsos) ---
@@ -226,22 +237,31 @@ def historicos(request):
 
     if setor_id:
         setores = setores.filter(id=setor_id)
-    
+    if status_filtro:
+        setores = setores.filter(ultima_atividade_avulso__isnull=False)
+
     setores = setores.order_by(F('ultima_atividade_avulso').desc(nulls_last=True))[:10]
     
     # --- PREENCHIMENTO PARA O TEMPLATE ---
     for eq in equipamentos:
-        # Aqui pegamos o último chamado QUALQUER para mostrar no card
-        eq.ultimo_chamado = Chamado.objects.filter(equipamento=eq).order_by('-criado_em').first()
+        qs_chamados = Chamado.objects.filter(equipamento=eq)
+        if status_filtro:
+            qs_chamados = qs_chamados.filter(status=status_filtro)
+        eq.ultimo_chamado = qs_chamados.order_by('-criado_em').first()
 
     for st in setores:
-        st.ultimo_avulso = Chamado.objects.filter(setor_avulso=st, tipo='avulso').order_by('-criado_em').first()
+        qs_avulsos = Chamado.objects.filter(setor_avulso=st, tipo='avulso')
+        if status_filtro:
+            qs_avulsos = qs_avulsos.filter(status=status_filtro)
+        st.ultimo_avulso = qs_avulsos.order_by('-criado_em').first()
 
     return render(request, 'manutencao/historicos.html', {
         'equipamentos': equipamentos,
         'setores': setores,
+        'todos_setores': lista_todos_setores,
         'search_query': q,
         'setor_selecionado': setor_id,
+        'status_selecionado': status_filtro,
     })
 
 
