@@ -140,8 +140,16 @@ def mecanico_dashboard(request):
     if not request.user.is_manutencao:
         return redirect('dashboard')
     
+    # --- LÓGICA DE PERMISSÃO ---
+    if request.user.tipo == 'mecanico_admin':
+        # Admin vê TUDO (removendo o filtro de mecanicos=request.user)
+        chamados_list = Chamado.objects.all()
+    else:
+        # Mecânico comum vê apenas os dele
+        chamados_list = Chamado.objects.filter(mecanicos=request.user)
+
     # lógica de filtros continua IGUAL 
-    chamados_list = Chamado.objects.filter(mecanicos=request.user).annotate(
+    chamados_list = chamados_list.annotate(
         ordem_status=Case(
             When(status='pendente', then=Value(1)),
             When(status='em_progresso', then=Value(2)),
@@ -362,7 +370,11 @@ def atualizar_status(request, chamado_id):
     if not request.user.is_manutencao:
         return redirect('dashboard')
     
-    chamado = get_object_or_404(Chamado, id=chamado_id, mecanicos=request.user)
+    if request.user.tipo == 'mecanico_admin':
+        chamado = get_object_or_404(Chamado, id=chamado_id)
+    else:
+        chamado = get_object_or_404(Chamado, id=chamado_id, mecanicos=request.user)
+
     if chamado.status == 'concluido':
         messages.error(request, 'Este chamado já foi concluído.')
         return redirect('chamado_detalhe', chamado.id)
