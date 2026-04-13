@@ -275,6 +275,9 @@ def historicos(request):
 
 @login_required
 def historico_equipamento(request, equipamento_id):
+    if not request.user.is_manutencao:
+        return redirect('dashboard')
+    
     equipamento = get_object_or_404(Equipamento, id=equipamento_id)
     chamados = Chamado.objects.filter(equipamento=equipamento).order_by('-criado_em')
     
@@ -285,6 +288,9 @@ def historico_equipamento(request, equipamento_id):
 
 @login_required
 def historico_setor(request, setor_id):
+    if not request.user.is_manutencao:
+        return redirect('dashboard')
+    
     setor = get_object_or_404(Setor, id=setor_id)
     # Filtra apenas chamados do tipo avulso para este setor
     chamados = Chamado.objects.filter(setor_avulso=setor, tipo='avulso').order_by('-criado_em')
@@ -429,6 +435,9 @@ def gerenciar_setores(request):
     })
 
 def editar_setor(request, pk):
+    if not request.user.is_manutencao:
+        return redirect('dashboard')
+    
     setor = get_object_or_404(Setor, pk=pk)
     
     if request.method == 'POST':
@@ -489,7 +498,11 @@ def gerenciar_equipamentos(request):
         'busca': busca 
     })
 
+@login_required
 def editar_equipamento(request, pk):
+    if not request.user.is_manutencao:
+        return redirect('dashboard')
+    
     equipamento = get_object_or_404(Equipamento, pk=pk)
     imagem_antiga = equipamento.imagem # Guarda a referência antes de mudar
     
@@ -528,6 +541,7 @@ def editar_equipamento(request, pk):
         'editando': True # Variável para mudar os textos no HTML
     })
 
+@login_required
 def gerenciar_energia(request):
     if not request.user.is_manutencao:
         return redirect('dashboard')
@@ -544,6 +558,8 @@ def gerenciar_energia(request):
 
 @login_required
 def get_equipamentos_por_setor(request, setor_id):
+    if not request.user.is_manutencao:
+        return JsonResponse({'error': 'Acesso negado. Permissão insuficiente.'}, status=403)
     equipamentos = Equipamento.objects.filter(setor_id=setor_id).values('id', 'nome','codigo', 'imagem')
     # Converter caminho da imagem para URL completa
     for eq in equipamentos:
@@ -551,7 +567,11 @@ def get_equipamentos_por_setor(request, setor_id):
             eq['imagem'] = request.build_absolute_uri('/media/' + eq['imagem'])
     return JsonResponse(list(equipamentos), safe=False)
 
+@login_required
 def api_detalhes_equipamento(request, pk):
+    if not request.user.is_manutencao:
+        return JsonResponse({'error': 'Acesso negado. Permissão insuficiente.'}, status=403)
+    
     equip = get_object_or_404(Equipamento, pk=pk)
     return JsonResponse({
         'id': equip.id,
@@ -563,11 +583,16 @@ def api_detalhes_equipamento(request, pk):
 
 @login_required
 def painel_qr_equipamento(request, pk):
+    if not request.user.is_manutencao:
+        return redirect('dashboard')
+    
     equipamento = get_object_or_404(Equipamento, pk=pk)
     return render(request, 'manutencao/painel_qr.html', {'equipamento': equipamento})
 
 @login_required
 def gerador_etiquetas(request):
+    if not request.user.is_manutencao:
+        return redirect('dashboard')
     # pega o parametro setorr da URL (se n vier nada, traz None)
     setor_filtrado = request.GET.get('setor')
     
