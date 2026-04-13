@@ -529,6 +529,9 @@ def editar_equipamento(request, pk):
     })
 
 def gerenciar_energia(request):
+    if not request.user.is_manutencao:
+        return redirect('dashboard')
+    
     if request.method == 'POST':
         numero = request.POST.get('numero')
         if numero:
