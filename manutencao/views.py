@@ -363,11 +363,13 @@ def criar_chamado(request):
     #Deixando os campos mecanicos e setores fora do else pra eles carregarem mesmo se der erro no form    
     mecanicos = Usuario.objects.filter(tipo='mecanico')
     setores = Setor.objects.all()
-    
+    equipamentos = Equipamento.objects.all()
+
     return render(request, 'manutencao/criar_chamado.html', {
         'form': form,
         'mecanicos': mecanicos,
-        'setores': setores
+        'setores': setores,
+        'equipamentos': equipamentos
     })
 
 
