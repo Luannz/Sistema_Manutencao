@@ -221,7 +221,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     const option = document.createElement('option');
                     option.value = eq.id;
 
-                    // Mudança aqui: Verifica se eq.codigo existe, se não é nulo e se não é a string "None"
                     const codExibicao = (eq.codigo && eq.codigo !== "None") ? ` (${eq.codigo})` : '';
                     option.textContent = eq.nome + codExibicao;
 

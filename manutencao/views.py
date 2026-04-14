@@ -560,8 +560,6 @@ def gerenciar_energia(request):
 
 @login_required
 def get_equipamentos_por_setor(request, setor_id):
-    if not request.user.is_manutencao:
-        return JsonResponse({'error': 'Acesso negado. Permissão insuficiente.'}, status=403)
     equipamentos = Equipamento.objects.filter(setor_id=setor_id).values('id', 'nome','codigo', 'imagem')
     # Converter caminho da imagem para URL completa
     for eq in equipamentos:
