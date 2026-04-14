@@ -221,8 +221,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     const option = document.createElement('option');
                     option.value = eq.id;
 
-                    const codExibicao = eq.codigo ? `(${eq.codigo})` : ''; // Se não tiver código, fica vazio
-                    option.textContent = `${eq.nome} ${codExibicao}`;
+                    // Mudança aqui: Verifica se eq.codigo existe, se não é nulo e se não é a string "None"
+                    const codExibicao = (eq.codigo && eq.codigo !== "None") ? ` (${eq.codigo})` : '';
+                    option.textContent = eq.nome + codExibicao;
 
                     option.dataset.imagem = eq.imagem || '';
                     equipamentoSelect.appendChild(option);
@@ -246,33 +247,33 @@ document.addEventListener('DOMContentLoaded', function() {
     // --- LÓGICA PARA TRATAR DADOS VINDOS DO QR CODE ---
     if (equipamentoSelect.value && tipoSelect.value === 'equipamento') {
         const idEquip = equipamentoSelect.value;
-        
+        const jaEstaPopulado = equipamentoSelect.options.length > 1;
+
         fetch(`/api/equipamento/detalhes/${idEquip}/`)
             .then(response => response.json())
             .then(data => {
                 if (data.setor_id) {
                     setorSelect.value = data.setor_id;
                     
-                    // --- ---
-                    // Como muda o setor via JS, precisamos carregar a lista de 
-                    // equipamentos desse setor para o select não ficar vazio ou incompleto
-                    fetch(`/api/equipamentos/setor/${data.setor_id}/`)
-                        .then(res => res.json())
-                        .then(listaEquips => {
-                            equipamentoSelect.innerHTML = '<option value="">Selecione um equipamento...</option>';
-                            listaEquips.forEach(eq => {
-                                const option = document.createElement('option');
-                                option.value = eq.id;
+                    if (!jaEstaPopulado) {
+                        fetch(`/api/equipamentos/setor/${data.setor_id}/`)
+                            .then(res => res.json())
+                            .then(listaEquips => {
+                                equipamentoSelect.innerHTML = '<option value="">Selecione um equipamento...</option>';
+                                listaEquips.forEach(eq => {
+                                    const option = document.createElement('option');
+                                    option.value = eq.id;
 
-                                const codExibicao = eq.codigo ? `(${eq.codigo})` : '';
-                                option.textContent = `${eq.nome} ${codExibicao}`;
-                                
-                                option.dataset.imagem = eq.imagem || '';
-                                // Mantém selecionado o equipamento do QR Code
-                                if (eq.id == idEquip) option.selected = true;
-                                equipamentoSelect.appendChild(option);
+                                    // Mesma verificação para evitar o (None)
+                                    const codExibicao = (eq.codigo && eq.codigo !== "None") ? ` (${eq.codigo})` : '';
+                                    option.textContent = eq.nome + codExibicao;
+
+                                    option.dataset.imagem = eq.imagem || '';
+                                    if (eq.id == idEquip) option.selected = true;
+                                    equipamentoSelect.appendChild(option);
+                                });
                             });
-                        });
+                    }
                 }
                 
                 if (data.imagem_url) {
