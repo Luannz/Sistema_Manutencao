@@ -208,8 +208,12 @@ document.addEventListener('DOMContentLoaded', function() {
         const setorId = this.value;
         if (tipoSelect.value === 'avulso') setorAvulsoInput.value = setorId;
         
+        // Limpa o select imediatamente para evitar que o usuário veja dados antigos/errados
+        equipamentoSelect.innerHTML = '<option value="">Carregando...</option>';
+        previewEquipamento.style.display = 'none';
+
         if (!setorId || tipoSelect.value !== 'equipamento') {
-            equipamentoSelect.innerHTML = '<option value="">Selecione um equipamento...</option>';
+            equipamentoSelect.innerHTML = '<option value="">Selecione um setor primeiro...</option>';
             return;
         }
         
@@ -220,10 +224,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 data.forEach(eq => {
                     const option = document.createElement('option');
                     option.value = eq.id;
-
                     const codExibicao = (eq.codigo && eq.codigo !== "None") ? ` (${eq.codigo})` : '';
                     option.textContent = eq.nome + codExibicao;
-
                     option.dataset.imagem = eq.imagem || '';
                     equipamentoSelect.appendChild(option);
                 });
@@ -243,44 +245,43 @@ document.addEventListener('DOMContentLoaded', function() {
 
     tipoSelect.addEventListener('change', toggleCampos);
 
-    // --- LÓGICA PARA TRATAR DADOS VINDOS DO QR CODE ---
+    // --- LÓGICA QR CODE ---
+    // Use uma função para popular para evitar repetição de código
+    function popularEquipamentosESelecionar(setorId, idParaSelecionar) {
+        return fetch(`/api/equipamentos/setor/${setorId}/`)
+            .then(res => res.json())
+            .then(listaEquips => {
+                equipamentoSelect.innerHTML = '<option value="">Selecione um equipamento...</option>';
+                listaEquips.forEach(eq => {
+                    const option = document.createElement('option');
+                    option.value = eq.id;
+                    const codExibicao = (eq.codigo && eq.codigo !== "None") ? ` (${eq.codigo})` : '';
+                    option.textContent = eq.nome + codExibicao;
+                    option.dataset.imagem = eq.imagem || '';
+                    
+                    if (eq.id == idParaSelecionar) {
+                        option.selected = true;
+                    }
+                    equipamentoSelect.appendChild(option);
+                });
+                // Dispara o evento change manualmente para atualizar a imagem do preview
+                equipamentoSelect.dispatchEvent(new Event('change'));
+            });
+    }
+
     if (equipamentoSelect.value && tipoSelect.value === 'equipamento') {
         const idEquip = equipamentoSelect.value;
-        const jaEstaPopulado = equipamentoSelect.options.length > 1;
 
         fetch(`/api/equipamento/detalhes/${idEquip}/`)
             .then(response => response.json())
             .then(data => {
                 if (data.setor_id) {
                     setorSelect.value = data.setor_id;
-                    
-                    if (!jaEstaPopulado) {
-                        fetch(`/api/equipamentos/setor/${data.setor_id}/`)
-                            .then(res => res.json())
-                            .then(listaEquips => {
-                                equipamentoSelect.innerHTML = '<option value="">Selecione um equipamento...</option>';
-                                listaEquips.forEach(eq => {
-                                    const option = document.createElement('option');
-                                    option.value = eq.id;
-
-                                    // Mesma verificação para evitar o (None)
-                                    const codExibicao = (eq.codigo && eq.codigo !== "None") ? ` (${eq.codigo})` : '';
-                                    option.textContent = eq.nome + codExibicao;
-
-                                    option.dataset.imagem = eq.imagem || '';
-                                    if (eq.id == idEquip) option.selected = true;
-                                    equipamentoSelect.appendChild(option);
-                                });
-                            });
-                    }
-                }
-                
-                if (data.imagem_url) {
-                    imgEquipamento.src = data.imagem_url;
-                    previewEquipamento.style.display = 'block';
+                    // Em vez de aninhar vários fetches, chamamos a função mestre
+                    popularEquipamentosESelecionar(data.setor_id, idEquip);
                 }
             })
-            .catch(err => console.log("Erro ao buscar detalhes do equipamento:", err));
+            .catch(err => console.error("Erro QR Code:", err));
     }
     toggleCampos();
 });

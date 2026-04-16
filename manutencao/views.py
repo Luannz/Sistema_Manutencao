@@ -363,7 +363,7 @@ def criar_chamado(request):
     #Deixando os campos mecanicos e setores fora do else pra eles carregarem mesmo se der erro no form    
     mecanicos = Usuario.objects.filter(tipo='mecanico')
     setores = Setor.objects.all()
-    equipamentos = Equipamento.objects.all()
+    equipamentos = Equipamento.objects.none() # Inicia vazio para não carregar tudo no início, e deixar pro JS carregar
 
     return render(request, 'manutencao/criar_chamado.html', {
         'form': form,
