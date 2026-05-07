@@ -124,6 +124,84 @@
         .obs-pendente { border-left: 4px solid #ffc107; color: #856404; }
         .obs-em_progresso { border-left: 4px solid #0d6efd; color: #087990; }
         .obs-concluido { border-left: 4px solid #198754; color: #0f5132; }
+
+        /* Barra de Navegação Inferior (Mobile Only) */
+        .mobile-bottom-nav {
+            display: none; /* Escondido por padrão */
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 65px;
+            background-color: var(--nav-dark);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 1030;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.2);
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .mobile-nav-item {
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 0.7rem;
+            font-weight: 500;
+            flex: 1;
+        }
+
+        .mobile-nav-item i {
+            font-size: 1.2rem;
+            margin-bottom: 4px;
+        }
+
+        .mobile-nav-item.active {
+            color: #fff;
+        }
+
+        .mobile-nav-item.active i {
+            color: var(--primary);
+        }
+
+        /* Ajuste para o conteúdo não ficar por baixo da barra no mobile */
+        @media (max-width: 768px) {
+            .mobile-bottom-nav {
+                display: flex; /* Mostra apenas no mobile */
+            }
+            body {
+                padding-bottom: 80px; /* Dá espaço para o scroll não cobrir o último card */
+            }
+            .border-md-start { border-left: 1px solid #dee2e6 !important; }
+            .border-md-end { border-right: 1px solid #dee2e6 !important; }
+        }
+
+        .cronometro-vivo {
+            font-family: 'Courier New', Courier, monospace; /* Fonte monoespaçada não pula ao mudar os números */
+            background: rgba(0,0,0,0.05);
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+
+        @keyframes pulse-blue {
+            0% { box-shadow: 0 0 0 0 rgba(13, 110, 253, 0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(13, 110, 253, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(13, 110, 253, 0); }
+        }
+
+        .animate-pulse {
+            animation: pulse-blue 2s infinite;
+        }
+
+        /* Deixa o botão com cara de "toque" no mobile */
+        .btn-lg {
+            transition: transform 0.1s active;
+        }
+        .btn-lg:active {
+            transform: scale(0.98);
+        }
     </style>
 </head>
 <body>
@@ -181,7 +259,7 @@
 
                     <div class="user-profile">
                         <div class="text-end me-2 d-none d-md-block">
-                            <div class="text-white lh-1" style="font-size: 0.8rem; font-weight: 600;">{{ user.username }} - (ID: {{user.id}})</div>
+                            <div class="text-white lh-1" style="font-size: 0.8rem; font-weight: 600;">{{ user.username }}(ID: {{ user.id }})</div>
                         </div>
                         <div class="user-avatar-circle">
                             {{ user.username|slice:":1"|upper }}
@@ -207,6 +285,70 @@
     </div>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-    {% block extra_js %}{% endblock %}
+    {% block extra_js %}
+    <script>
+        function atualizarCronometros() {
+            const agora = new Date();
+
+            document.querySelectorAll('.cronometro-vivo').forEach(el => {
+                const dataInicioStr = el.getAttribute('data-start');
+                if (!dataInicioStr) return;
+
+                const dataInicio = new Date(dataInicioStr);
+                const diffDesc = agora - dataInicio;
+
+                if (diffDesc < 0) return;
+
+                const segundosTotais = Math.floor(diffDesc / 1000);
+                const dias = Math.floor(segundosTotais / 86400);
+                const horas = Math.floor((segundosTotais % 86400) / 3600);
+                const minutos = Math.floor((segundosTotais % 3600) / 60);
+                const segundos = segundosTotais % 60;
+
+                let texto = "";
+                if (dias > 0) texto += `${dias}d `;
+                
+                const h = String(horas).padStart(2, '0');
+                const m = String(minutos).padStart(2, '0');
+                const s = String(segundos).padStart(2, '0');
+                
+                texto += `${h}:${m}:${s}`;
+
+                el.innerText = texto;
+
+                // Alerta visual: se passar de 24h (1 dia), fica vermelho
+                if (dias >= 1) {
+                    el.style.color = '#ef4444'; // var(--danger)
+                    el.style.fontWeight = 'bold';
+                }
+            });
+        }
+
+        // Inicia o intervalo de 1 segundo
+        setInterval(atualizarCronometros, 1000);
+        // Chama imediatamente para não esperar 1 segundo pelo primeiro ciclo
+        atualizarCronometros();
+    </script>
+    {% endblock %}
+    {% if user.is_authenticated and request.resolver_match.url_name in 'dashboard,mecanico_dashboard,solicitante_dashboard,admin_dashboard' %}
+    <div class="mobile-bottom-nav d-md-none">
+        <a href="?status=pendente#lista-chamados" class="mobile-nav-item {% if request.GET.status == 'pendente' %}active{% endif %}">
+            <i class="fas fa-clock"></i>
+            <span>Pendentes</span>
+        </a>
+        <a href="?status=em_progresso#lista-chamados" class="mobile-nav-item {% if request.GET.status == 'em_progresso' %}active{% endif %}">
+            <i class="fas fa-spinner"></i>
+            <span>Andamento</span>
+        </a>
+        <a href="?status=concluido#lista-chamados" class="mobile-nav-item {% if request.GET.status == 'concluido' %}active{% endif %}">
+            <i class="fas fa-check-double"></i>
+            <span>Concluídos</span>
+        </a>
+        <a href="{% url 'dashboard' %}#lista-chamados" class="mobile-nav-item {% if not request.GET.status %}active{% endif %}">
+            <i class="fas fa-list"></i>
+            <span>Todos</span>
+        </a>
+    </div>
+    {% endif %}
 </body>
 </html>

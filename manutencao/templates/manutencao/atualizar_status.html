@@ -97,55 +97,93 @@
                     </div>
                     {% endif %}
                     
-                    <p class="mb-0 mt-3">
-                        <strong>Status Atual:</strong> 
-                        <span class="badge {% if chamado.status == 'pendente' %}bg-warning text-dark{% elif chamado.status == 'em_progresso' %}bg-primary{% else %}bg-success{% endif %}">
-                            {{ chamado.get_status_display }}
-                        </span>
-                    </p>
-                    {% if chamado.status == 'concluido' %}
-                        <p class="small mb-1">
-                            <i class="fas fa-stopwatch me-1"></i>
-                            <strong>Ficou aberto por:</strong> {{ chamado.tempo_aberto_formatado }}
-                        </p>
-                        <p class="small mb-2">
-                            <i class="fas fa-check-circle text-success me-1"></i>
-                            Concluído em {{ chamado.concluido_em|date:"d/m/Y H:i" }}
-                        </p>
-                    {% else %}
-                        <p class="small mb-2">
-                            <i class="fas fa-hourglass-half me-1"></i>
-                            <strong>Aberto há:</strong> {{ chamado.tempo_aberto_formatado }}
-                        </p>
-                    {% endif %}
+                    <div class="mt-4 p-3 rounded bg-white border shadow-sm">
+                        <div class="row g-3 align-items-center">
+                            
+                            <div class="col-12 col-md-3 text-center text-md-start">
+                                <span class="text-muted small d-block mb-1">Status Atual</span>
+                                <span class="badge {% if chamado.status == 'pendente' %}bg-warning text-dark{% elif chamado.status == 'em_progresso' %}bg-primary{% else %}bg-success{% endif %} fs-6 w-100 w-md-auto">
+                                    {{ chamado.get_status_display }}
+                                </span>
+                            </div>
+
+                            <div class="col-12 col-md-6 border-md-start border-md-end px-md-4 my-2 my-md-0">
+                                <div class="text-center">
+                                    <div class="text-muted small mb-1">
+                                        <i class="fas fa-tools text-primary me-1"></i>Tempo em Execução
+                                    </div>
+                                    
+                                    {% if chamado.status == 'pendente' %}
+                                        <div class="h5 fw-bold text-muted mb-0">Aguardando Início</div>
+                                    {% elif chamado.status == 'concluido' %}
+                                        <div class="h4 fw-bold text-success mb-0">{{ chamado.tempo_execucao_formatado }}</div>
+                                    {% else %}
+                                        <div class="cronometro-vivo h2 fw-bold text-primary mb-0" 
+                                            data-start="{{ chamado.iniciado_em|date:'c' }}">
+                                            00:00:00
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-md-3 text-center text-md-end">
+                                <span class="text-muted small d-block mb-1">Aberto há</span>
+                                <span class="fw-bold text-secondary fs-5">
+                                    <i class="far fa-clock me-1 small"></i>{{ chamado.tempo_aberto_formatado }}
+                                </span>
+                            </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="small mt-3 pt-2 border-top text-muted">
+                            {% if chamado.iniciado_em %}
+                                <i class="fas fa-play-circle me-1"></i> Execução iniciada em: {{ chamado.iniciado_em|date:"d/m/Y H:i" }}
+                            {% else %}
+                                <i class="fas fa-info-circle me-1"></i> Aberto em: {{ chamado.criado_em|date:"d/m/Y H:i" }}
+                            {% endif %}
+                        </div>
+                    </div>
 
                 </div>
                 
                 <form method="post">
                     {% csrf_token %}
                     
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">
-                            <i class="fas fa-sync-alt me-1"></i>Novo Status
+                    <div class="my-4">
+                        <label class="form-label fw-semibold d-block mb-3">
+                            <i class="fas fa-tasks me-1"></i>Ação Necessária
                         </label>
-                        <select name="status" class="form-control" required>
-                            
-                            {# Se o chamado está pendente, ele pode continuar pendente ou iniciar #}
-                            {% if chamado.status == 'pendente' %}
-                                <option value="pendente" selected>Pendente</option>
-                                <option value="em_progresso">Em Progresso (Iniciar)</option>
-                            
-                            {# Se já iniciou, ele NÃO pode voltar para pendente. Só fica em progresso ou conclui #}
-                            {% elif chamado.status == 'em_progresso' %}
-                                <option value="em_progresso" selected>Em Progresso</option>
-                                <option value="concluido">Concluído</option>
-                            
-                            {# Se já estiver concluído mostra apenas concluído #}
-                            {% else %}
-                                <option value="concluido" selected>Concluído</option>
-                            {% endif %}
 
-                        </select>
+                        <input type="hidden" name="status" id="id_status_input" value="{{ chamado.status }}">
+
+                        <div class="d-grid gap-3">
+                            {% if chamado.status == 'pendente' %}
+                                <button type="submit" 
+                                        onclick="document.getElementById('id_status_input').value='em_progresso'" 
+                                        class="btn btn-primary btn-lg py-3 shadow-sm border-0 animate-pulse">
+                                    <i class="fas fa-play-circle fa-2x mb-2 d-block"></i>
+                                    <span class="fs-4 fw-bold">INICIAR CHAMADO</span>
+                                    <small class="d-block opacity-75">Clique para começar o atendimento agora</small>
+                                </button>
+
+                            {% elif chamado.status == 'em_progresso' %}
+                                <button type="submit" 
+                                        onclick="document.getElementById('id_status_input').value='concluido'" 
+                                        class="btn btn-success btn-lg py-3 shadow-sm border-0">
+                                    <i class="fas fa-check-double fa-2x mb-2 d-block"></i>
+                                    <span class="fs-4 fw-bold">CONCLUIR CHAMADO</span>
+                                    <small class="d-block opacity-75">Trabalho finalizado e máquina liberada</small>
+                                </button>
+
+                            {% else %}
+                                <div class="alert alert-success text-center border-0 shadow-sm py-4">
+                                    <i class="fas fa-check-circle fa-3x mb-2"></i>
+                                    <h4 class="fw-bold">Chamado Concluído</h4>
+                                    <p class="mb-0">Este atendimento já foi finalizado.</p>
+                                </div>
+                            {% endif %}
+                        </div>
                     </div>
                     
                     <div class="mb-4">
@@ -158,7 +196,7 @@
                     
                     <div class="d-grid gap-2">
                         <button type="submit" class="btn btn-primary btn-lg">
-                            <i class="fas fa-save me-2"></i>Salvar Alterações
+                            <i class="fas fa-save me-2"></i>Salvar Observações
                         </button>
                         <a href="{% url 'mecanico_dashboard' %}" class="btn btn-outline-secondary">
                             <i class="fas fa-arrow-left me-1"></i>Voltar

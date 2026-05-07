@@ -184,7 +184,14 @@ def mecanico_dashboard(request):
         chamados_list = chamados_list.filter(criado_em__gte=uma_semana_atras)
 
     ordem = request.GET.get('ordem', 'ordem_status') # ajustado para respeitar a anotação se não houver ordem
-    chamados_list = chamados_list.order_by(ordem, '-criado_em')
+    if ordem:
+        # Se clicou num filtro específico, respeita a ordenação escolhida (data ou prioridade)
+        chamados_list = chamados_list.order_by(ordem, '-criado_em')
+    else:
+        # Primeiro por Status (Pendentes e Em Progresso)
+        # Depois por Prioridade (1, 2, 3)
+        # Por fim, os mais recentes dentro desses grupos
+        chamados_list = chamados_list.order_by('ordem_status', 'prioridade', '-criado_em')
 
     # 2. CALCULAR OS TOTAIS ANTES DA PAGINACÃO
     pendentes = chamados_list.filter(status='pendente').count()
@@ -400,7 +407,7 @@ def atualizar_status(request, chamado_id):
 
     if chamado.status == 'concluido':
         messages.error(request, 'Este chamado já foi concluído.')
-        return redirect('chamado_detalhe', chamado.id)
+        return redirect('dashboard')
 
     if request.method == 'POST':
         novo_status = request.POST.get('status')
@@ -420,9 +427,13 @@ def atualizar_status(request, chamado_id):
                 chamado.observacoes_mecanico = observacoes
             
             chamado.save()
-            messages.success(request, 'Status atualizado com sucesso!')
+            messages.success(request, 'Atualizado com sucesso!')
         
-        return redirect('mecanico_dashboard')
+            if novo_status == 'concluido':
+                return redirect('mecanico_dashboard')
+                
+            # Se apenas iniciou (em_progresso), mantém na mesma tela para ele ver o cronômetro
+            return redirect('atualizar_status', chamado.id)
     
     return render(request, 'manutencao/atualizar_status.html', {
         'chamado': chamado
