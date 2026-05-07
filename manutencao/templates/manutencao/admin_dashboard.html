@@ -20,60 +20,95 @@
             <i class="fas fa-exclamation-triangle me-2"></i>Aguardando Designação
             <span class="badge bg-dark ms-2">{{ chamados_novos.count }}</span>
         </div>
-        <div class="card-body">
-            {% if chamados_novos %}
-            <div class="table-responsive">
-                <table class="table table-hover align-middle">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Data</th>
-                            <th>Equipamento/Setor</th>
-                            <th>Solicitante</th>
-                            <th>Descrição</th>
-                            <th>Prioridade Solicitante</th>
-                            <th class="text-center">Ação</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for chamado in chamados_novos %}
-                        <tr class='align-top'>
-                            <td>{{ chamado.criado_em|date:"d/m/Y H:i" }}</td>
-                            <td>
+        <div class="card-body p-0 p-md-3"> {% if chamados_novos %}
+        
+                <div class="d-md-none">
+                    {% for chamado in chamados_novos %}
+                    <div class="border-bottom p-3">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <small class="text-muted d-block">{{ chamado.criado_em|date:"d/m/Y H:i" }}</small>
                                 {% if chamado.producao_parada %}
-                                    <span class="badge bg-danger animate__animated animate__flash animate__infinite">
+                                    <span class="badge bg-danger animate__animated animate__flash animate__infinite mb-1">
                                         <i class="fas fa-stop-circle"></i> PRODUÇÃO PARADA
                                     </span>
                                 {% endif %}
-                                {% if chamado.tipo == 'equipamento' %}
-                                    <strong>{{ chamado.equipamento.nome }}</strong>
-                                {% else %}
-                                    <span class="badge bg-light text-dark border mb-1" style="font-size: 0.7rem;">AVULSO</span>
-                                {% endif %}
-                                <br>
+                                <div class="h6 mb-0">
+                                    {% if chamado.tipo == 'equipamento' %}
+                                        <strong>{{ chamado.equipamento.nome }}</strong>
+                                    {% else %}
+                                        <span class="badge bg-light text-dark border">AVULSO</span>
+                                    {% endif %}
+                                </div>
                                 <small class="text-muted"><i class="fas fa-map-marker-alt me-1"></i>{{ chamado.nome_setor }}</small>
-                            </td>
-                            <td>{{ chamado.solicitante.get_full_name|default:chamado.solicitante.username }}</td>
-                            <td><small>{{ chamado.descricao|truncatewords:10 }}</small></td>
-                            <td>
+                            </div>
+                            <div class="text-end">
                                 {% if chamado.prioridade == 1 %}<span class="badge bg-danger">Alta</span>
                                 {% elif chamado.prioridade == 2 %}<span class="badge bg-warning text-dark">Média</span>
                                 {% else %}<span class="badge bg-info text-dark">Baixa</span>{% endif %}
-                            </td>
-                            <td class="text-center">
-                                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalDesignar{{ chamado.id }}" style="cursor: pointer;">
-                                    <i class="fas fa-user-plus me-1"></i>Designar Equipe
-                                </button>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-light p-2 rounded mb-3">
+                            <small class="d-block text-dark"><strong>Descrição:</strong> {{ chamado.descricao|truncatechars:100 }}</small>
+                            <small class="text-muted"><strong>Por:</strong> {{ chamado.solicitante.get_full_name|default:chamado.solicitante.username }}</small>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalDesignar{{ chamado.id }}">
+                                <i class="fas fa-user-plus me-1"></i>Designar Equipe
+                            </button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="table-responsive d-none d-md-block">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Data</th>
+                                <th>Equip/Setor</th>
+                                <th>Solicitante</th>
+                                <th>Descrição</th>
+                                <th>Prioridade</th>
+                                <th class="text-center">Ação</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for chamado in chamados_novos %}
+                            <tr>
+                                <td style="white-space: nowrap;"><small>{{ chamado.criado_em|date:"d/m/Y H:i" }}</small></td>
+                                <td>
+                                    {% if chamado.producao_parada %}
+                                        <span class="badge bg-danger animate__animated animate__flash animate__infinite mb-1">PRODUÇÃO PARADA</span><br>
+                                    {% endif %}
+                                    <strong>{{ chamado.equipamento.nome|default:"AVULSO" }}</strong><br>
+                                    <small class="text-muted">{{ chamado.nome_setor }}</small>
+                                </td>
+                                <td>{{ chamado.solicitante.get_full_name|default:chamado.solicitante.username }}</td>
+                                <td><small>{{ chamado.descricao|truncatewords:10 }}</small></td>
+                                <td>
+                                    {% if chamado.prioridade == 1 %}<span class="badge bg-danger">Alta</span>
+                                    {% elif chamado.prioridade == 2 %}<span class="badge bg-warning text-dark">Média</span>
+                                    {% else %}<span class="badge bg-info text-dark">Baixa</span>{% endif %}
+                                </td>
+                                <td class="text-center">
+                                    <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalDesignar{{ chamado.id }}">
+                                        <i class="fas fa-user-plus"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
             {% else %}
-            <div class="text-center py-4 text-muted">
-                <i class="fas fa-check-circle fa-2x mb-2 text-success"></i>
-                <p>Nenhum chamado pendente de atribuição.</p>
-            </div>
+                <div class="text-center py-5 text-muted">
+                    <i class="fas fa-check-circle fa-3x mb-3 text-success opacity-50"></i>
+                    <p class="mb-0">Nenhum chamado pendente de atribuição.</p>
+                </div>
             {% endif %}
         </div>
     </div>
