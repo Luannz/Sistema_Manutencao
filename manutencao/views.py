@@ -12,6 +12,9 @@ from .forms import ChamadoForm, SetorForm, EquipamentoForm
 from datetime import datetime, timedelta
 import os
 
+from .utils import enviar_notificacao_ntfy
+from .utils import notificar_mecanico_designado
+# funcoes criadas pra notificar usando o ntfy quando abre e quando atribui um chamado
 
 def login_view(request):
     if request.user.is_authenticated:
@@ -129,6 +132,16 @@ def atribuir_chamado(request, chamado_id):
         mecanicos_ids = request.POST.getlist('mecanicos')
         if mecanicos_ids:
             chamado.mecanicos.set(mecanicos_ids)
+
+            # --- NOTIFICAÇÃO NTFY PARA CADA MECÂNICO ---
+            # Pegamos o host atual para o link funcionar
+            host_atual = request.get_host()
+            
+            # Percorremos os mecânicos que acabaram de ser atribuídos
+            for mecanico in chamado.mecanicos.all():
+                notificar_mecanico_designado(chamado, mecanico, host_atual)
+            # -------------------------------------------
+
             messages.success(request, f"Chamado {chamado.id} atribuído e prioridade atualizada!")
         else:
             messages.warning(request, f"Chamado {chamado.id} atualizado, mas sem equipe técnica.")
@@ -323,6 +336,8 @@ def criar_chamado(request):
             
             # Agora o save() não vai mais falhar porque o solicitante_id não será NULL
             chamado.save()
+            # vamos puxar a funcao de notificacao aqui, depois de salvar o
+            enviar_notificacao_ntfy(chamado, request.get_host())
 
             # Salvar mecânicos (Muitos-para-Muitos)
             mecanicos_ids = request.POST.getlist('mecanicos')
