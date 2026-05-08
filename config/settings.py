@@ -60,7 +60,11 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'qr_code',
     'manutencao',
+    'django_celery_beat',
 ]
+
+CELERY_BROKER_URL = 'redis://redis:6379/0'  # nome do serviço no docker-compose
+CELERY_TIMEZONE = 'America/Sao_Paulo'
 
 AUTH_USER_MODEL = 'manutencao.Usuario'
 
