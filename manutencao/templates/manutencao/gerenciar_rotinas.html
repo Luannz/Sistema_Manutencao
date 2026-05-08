@@ -1,0 +1,294 @@
+{% extends "manutencao/base.html" %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="h4 mb-0 text-gray-800">
+            <i class="fas fa-tools me-2 text-primary"></i>Gestão de Rotinas Preventivas
+        </h2>
+        <a href="{% url 'mecanico_dashboard' %}" class="btn btn-sm btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Voltar
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header {% if editando %}bg-warning{% else %}bg-primary{% endif %} text-white py-3">
+                    <h5 class="card-title mb-0">
+                        <i class="fas {% if editando %}fa-edit{% else %}fa-plus-circle{% endif %} me-2"></i>
+                        {% if editando %}Editar Rotina{% else %}Nova Rotina{% endif %}
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post" id="formRotina">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-uppercase text-muted">Nome da Rotina</label>
+                            {{ form.nome_rotina }}
+                        </div>
+
+                        <div class="row">
+                            <div class="col-6 mb-3">
+                                <label class="form-label small fw-bold text-uppercase text-muted">Tipo</label>
+                                {{ form.tipo }}
+                            </div>
+                            <div class="col-6 mb-3">
+                                <label class="form-label small fw-bold text-uppercase text-muted">Prioridade</label>
+                                {{ form.prioridade }}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-uppercase text-muted">Setor</label>
+                            <select id="select-setor" class="form-select border-primary-subtle">
+                                <option value="">Selecione um setor...</option>
+                                {% for setor in setores %}
+                                    <option value="{{ setor.id }}" {% if form.instance.setor.id == setor.id %}selected{% endif %}>
+                                        {{ setor.nome }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="mb-3" id="div-equipamento">
+                            <label class="form-label small fw-bold text-uppercase text-muted">Equipamento</label>
+                            {{ form.equipamento }}
+                        </div>
+
+                        {{ form.setor }} <div class="mb-3">
+                            <label class="form-label small fw-bold text-uppercase text-muted">Descrição Técnica</label>
+                            {{ form.descricao }}
+                        </div>
+
+                        <hr class="my-4 text-muted">
+
+                        <div class="row">
+                            <div class="col-6 mb-3">
+                                <label class="form-label small fw-bold text-uppercase text-muted">Frequência</label>
+                                {{ form.frequencia }}
+                            </div>
+                            <div class="col-6 mb-3">
+                                <label class="form-label small fw-bold text-uppercase text-muted">Próxima Data</label>
+                                {{ form.proxima_execucao }}
+                            </div>
+                        </div>
+
+                        <div class="mb-3" id="div-intervalo" style="display: none;">
+                            <label class="form-label small fw-bold text-uppercase text-primary">Intervalo (Dias)</label>
+                            {{ form.intervalo_dias }}
+                        </div>
+
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-success btn-lg shadow-sm">
+                                <i class="fas fa-save me-2"></i>Salvar Rotina
+                            </button>
+                            {% if editando %}
+                                <a href="{% url 'gerenciar_rotinas' %}" class="btn btn-light border text-muted">
+                                    Cancelar Edição
+                                </a>
+                            {% endif %}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0 text-primary">Rotinas Ativas</h5>
+                    <span class="badge bg-primary rounded-pill">{{ rotinas.count }} Cadastradas</span>
+                </div>
+                
+                <div class="table-responsive d-none d-md-block">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 40%">Rotina / Alvo</th>
+                                <th>Frequência</th>
+                                <th>Próxima Execução</th>
+                                <th class="text-end px-4">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for rotina in rotinas %}
+                            <tr>
+                                <td>
+                                    <div class="fw-bold">{{ rotina.nome_rotina }}</div>
+                                    <div class="small text-muted">
+                                        {% if rotina.tipo == 'equipamento' %}
+                                            <i class="fas fa-cog me-1"></i> {{ rotina.equipamento.nome }}
+                                        {% else %}
+                                            <i class="fas fa-layer-group me-1"></i> Setor: {{ rotina.setor.nome }}
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-primary border border-primary-subtle px-3 py-2">
+                                        {{ rotina.get_frequencia_display }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="small fw-bold {% if rotina.proxima_execucao <= hoje %}text-danger{% else %}text-dark{% endif %}">
+                                        <i class="far fa-calendar-alt me-1"></i> {{ rotina.proxima_execucao|date:"d/m/Y" }}
+                                    </div>
+                                </td>
+                                <td class="text-end px-4">
+                                    <div class="btn-group shadow-sm">
+                                        <a href="?edit={{ rotina.id }}" class="btn btn-sm btn-white text-primary border" title="Editar">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <button class="btn btn-sm btn-white text-danger border" onclick="confirmarExclusao({{ rotina.id }}, '{{ rotina.nome_rotina }}')" title="Excluir">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="4" class="text-center py-5 text-muted">Nenhuma rotina cadastrada.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="d-md-none">
+                    {% for rotina in rotinas %}
+                    <div class="p-3 border-bottom position-relative">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <h6 class="mb-0 fw-bold text-primary">{{ rotina.nome_rotina }}</h6>
+                                <small class="text-muted">
+                                    {% if rotina.tipo == 'equipamento' %}
+                                        Eq: {{ rotina.equipamento.nome }}
+                                    {% else %}
+                                        Setor: {{ rotina.setor.nome }}
+                                    {% endif %}
+                                </small>
+                            </div>
+                            <span class="badge bg-info-subtle text-info border border-info-subtle px-2">
+                                {{ rotina.get_frequencia_display }}
+                            </span>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <div class="small">
+                                <span class="text-muted">Próxima:</span>
+                                <span class="fw-bold {% if rotina.proxima_execucao <= hoje %}text-danger{% endif %}">
+                                    {{ rotina.proxima_execucao|date:"d/m/Y" }}
+                                </span>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <a href="?edit={{ rotina.id }}" class="btn btn-primary btn-sm px-3">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <button class="btn btn-outline-danger btn-sm px-3" onclick="confirmarExclusao({{ rotina.id }}, '{{ rotina.nome_rotina }}')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="p-5 text-center text-muted small">Nenhuma rotina cadastrada.</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Seletores
+    const tipoSelect = document.getElementById('id_tipo');
+    const setorSelect = document.getElementById('select-setor');
+    const equipamentoSelect = document.getElementById('id_equipamento');
+    const setorHidden = document.getElementById('id_setor');
+    const divEquipamento = document.getElementById('div-equipamento');
+    const freqSelect = document.getElementById('id_frequencia');
+    const divIntervalo = document.getElementById('div-intervalo');
+
+    // --- 1. LÓGICA DE EQUIPAMENTOS ---
+    function carregarEquipamentos(setorId, equipamentoSelecionadoId = null) {
+        if (!setorId) {
+            equipamentoSelect.innerHTML = '<option value="">Selecione um setor primeiro...</option>';
+            equipamentoSelect.disabled = true;
+            return;
+        }
+
+        equipamentoSelect.innerHTML = '<option value="">Carregando...</option>';
+        equipamentoSelect.disabled = true;
+
+        fetch(`/api/equipamentos/setor/${setorId}/`)
+            .then(res => res.json())
+            .then(data => {
+                equipamentoSelect.innerHTML = '<option value="">Selecione um equipamento...</option>';
+                if (data.length > 0) {
+                    data.forEach(eq => {
+                        const option = document.createElement('option');
+                        option.value = eq.id;
+                        option.textContent = eq.nome + (eq.codigo ? ` (${eq.codigo})` : '');
+                        if (equipamentoSelecionadoId && eq.id == equipamentoSelecionadoId) option.selected = true;
+                        equipamentoSelect.appendChild(option);
+                    });
+                    equipamentoSelect.disabled = false;
+                } else {
+                    equipamentoSelect.innerHTML = '<option value="">Nenhum equipamento neste setor</option>';
+                }
+            });
+    }
+
+    function toggleCampos() {
+        if (tipoSelect.value === 'equipamento') {
+            divEquipamento.style.display = 'block';
+            equipamentoSelect.disabled = !setorSelect.value;
+        } else {
+            divEquipamento.style.display = 'none';
+            equipamentoSelect.disabled = true;
+            equipamentoSelect.value = '';
+        }
+        
+        // Frequência personalizada
+        divIntervalo.style.display = freqSelect.value === 'personalizado' ? 'block' : 'none';
+    }
+
+    // Eventos
+    setorSelect.addEventListener('change', function() {
+        setorHidden.value = this.value;
+        if (tipoSelect.value === 'equipamento') carregarEquipamentos(this.value);
+    });
+
+    tipoSelect.addEventListener('change', toggleCampos);
+    freqSelect.addEventListener('change', toggleCampos);
+
+    // Inicialização (Edição)
+    if (setorSelect.value) {
+        setorHidden.value = setorSelect.value;
+        const idAtual = "{{ form.instance.equipamento.id|default:'' }}";
+        if (tipoSelect.value === 'equipamento') carregarEquipamentos(setorSelect.value, idAtual);
+    }
+    
+    toggleCampos();
+});
+
+// Modal ou Confirm de Exclusão amigável
+function confirmarExclusao(id, nome) {
+    if (confirm(`Atenção!\n\nDeseja realmente excluir a rotina: "${nome}"?\nEsta ação não poderá ser desfeita.`)) {
+        window.location.href = `/rotinas/excluir/${id}/`;
+    }
+}
+</script>
+
+<style>
+    .card { border-radius: 12px; }
+    .card-header:first-child { border-radius: 12px 12px 0 0; }
+    .form-control, .form-select { border-radius: 8px; padding: 0.6rem 0.8rem; border: 1px solid #dee2e6; }
+    .form-control:focus, .form-select:focus { border-color: #4e73df; box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.1); }
+    .btn-lg { border-radius: 10px; font-weight: 600; padding: 0.8rem; }
+    .badge { font-weight: 500; border-radius: 6px; }
+    .table th { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; color: #6c757d; }
+    /* Ajuste para botões não sumirem no hover da linha */
+    .btn-white:hover { background-color: #f8f9fa; }
+</style>
+{% endblock %}

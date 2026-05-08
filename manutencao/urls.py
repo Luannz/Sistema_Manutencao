@@ -20,7 +20,11 @@ urlpatterns = [
     path('historicos/', views.historicos, name='historicos'),
     path('historicos/equipamento/<int:equipamento_id>/', views.historico_equipamento, name='historico_equipamento'),
     path('historicos/setor/<int:setor_id>/', views.historico_setor, name='historico_setor'),
+    
     path('admin-manutencao/', views.dashboard_admin_manutencao, name='dashboard_admin_manutencao'),
+    path('rotinas/', views.gerenciar_rotinas, name='gerenciar_rotinas'),
+    path('rotinas/excluir/<int:rotina_id>/', views.excluir_rotina, name='excluir_rotina'),
+
     path('chamado/<int:chamado_id>/atribuir/', views.atribuir_chamado, name='atribuir_chamado'),
     path('energia/gerenciar/', views.gerenciar_energia, name='gerenciar_energia'),
     path('painel-qr/<int:pk>/', views.painel_qr_equipamento, name='painel_qr'),
