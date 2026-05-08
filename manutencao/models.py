@@ -126,6 +126,39 @@ class Equipamento(models.Model):
         self.imagem = File(buffer, name=f"{nome_sem_extensao}.jpg")
 
 
+class RotinaManutencao(models.Model):
+    # Escolha de frequência
+    FREQUENCIA_CHOICES = [
+        ('diario', 'Diário'),
+        ('semanal', 'Semanal'),
+        ('mensal', 'Mensal'),
+        ('personalizado', 'Personalizado (Dias)'),
+    ]
+
+    TIPO_CHOICES = [
+        ('equipamento', 'Equipamento'),
+        ('setor', 'Setor (Manutenção Avulsa)'),
+    ]
+        
+    tipo = models.CharField(max_length=20, choices=TIPO_CHOICES, default='equipamento')
+    nome_rotina = models.CharField(max_length=100) # Ex: Troca de Correia Mensal
+    equipamento = models.ForeignKey('Equipamento', on_delete=models.CASCADE, null=True, blank=True)
+    setor = models.ForeignKey('Setor', on_delete=models.CASCADE, null=True, blank=True)
+    descricao = models.TextField()
+    prioridade = models.IntegerField(default=2) # 1: Alta, 2: Média, 3: Baixa
+    frequencia = models.CharField(max_length=20, choices=FREQUENCIA_CHOICES)
+    intervalo_dias = models.PositiveIntegerField(null=True, blank=True, help_text="Usado se for personalizado")
+    
+    ultima_execucao = models.DateField(auto_now_add=True)
+    proxima_execucao = models.DateField() # O sistema vai olhar para esta data
+    
+    ativo = models.BooleanField(default=True)
+    criado_por = models.ForeignKey(Usuario, on_delete=models.SET_NULL, null=True)
+
+    def __str__(self):
+        return f"{self.nome_rotina} - {self.equipamento.nome}"
+
+
 class Chamado(models.Model):
     STATUS_CHOICES = [
         ('pendente', 'Pendente'),
