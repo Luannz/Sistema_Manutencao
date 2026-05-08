@@ -33,10 +33,8 @@ DEBUG = os.getenv('DEBUG', 'True') == 'True'
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
-    '0.0.0.0',
     '192.168.2.4',
     '192.168.2.5',
-    '*',
     '192.168.2.244',
     'manutencao.tenislynd.com.br',
 ]
