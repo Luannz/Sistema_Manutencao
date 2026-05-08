@@ -1,7 +1,7 @@
 # ==================== FORMS.PY ====================
 from django import forms
 from django.forms import ClearableFileInput
-from .models import Chamado, Setor, Equipamento
+from .models import Chamado, Setor, Equipamento, RotinaManutencao
 
 class MultipleFileInput(ClearableFileInput):
     allow_multiple_selected = True
@@ -83,3 +83,32 @@ class EquipamentoForm(forms.ModelForm):
             raise forms.ValidationError("Este código de equipamento já está em uso por outra máquina.")
         
         return codigo
+    
+
+class RotinaManutencaoForm(forms.ModelForm):
+    class Meta:
+        model = RotinaManutencao
+        fields = ['nome_rotina','tipo','setor','equipamento', 'descricao', 'prioridade', 
+                  'frequencia', 'intervalo_dias', 'proxima_execucao']
+        widgets = {
+            'proxima_execucao': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'descricao': forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
+            'nome_rotina': forms.TextInput(attrs={'class': 'form-control'}),
+            'tipo': forms.Select(attrs={'class': 'form-select', 'id': 'id_tipo'}),
+            # O setor é preenchido via JS baseado no select de auxílio, então deixamos oculto
+            'setor': forms.HiddenInput(attrs={'id': 'id_setor'}),
+            'equipamento': forms.Select(attrs={'class': 'form-select'}),
+            'prioridade': forms.Select(choices=[(1, 'Alta'), (2, 'Média'), (3, 'Baixa')], attrs={'class': 'form-select'}),
+            'frequencia': forms.Select(attrs={'class': 'form-select'}),
+            'intervalo_dias': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Ex: 15'}),
+        }
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Como o usuário vai alternar entre Equipamento e Setor,
+        # esses campos não podem ser obrigatórios no nível do Python (validação do formulário),
+        # pois um deles sempre estará vazio.
+        self.fields['equipamento'].widget.attrs['disabled'] = 'disabled'
+        self.fields['equipamento'].choices = [('', 'Selecione um setor primeiro...')]
+        self.fields['equipamento'].required = False
+        self.fields['setor'].required = False
+        self.fields['intervalo_dias'].required = False

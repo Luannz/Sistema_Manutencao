@@ -7,8 +7,8 @@ from django.core.paginator import Paginator
 from django.utils import timezone
 from django.http import JsonResponse
 from django.db.models import Case, When, Value, IntegerField, Q , Max, F
-from .models import Usuario, Setor, Equipamento, Chamado, ImagemChamado, Energia
-from .forms import ChamadoForm, SetorForm, EquipamentoForm
+from .models import Usuario, Setor, Equipamento, Chamado, ImagemChamado, Energia, RotinaManutencao
+from .forms import ChamadoForm, SetorForm, EquipamentoForm, RotinaManutencaoForm
 from datetime import datetime, timedelta
 import os
 
@@ -147,6 +147,66 @@ def atribuir_chamado(request, chamado_id):
             messages.warning(request, f"Chamado {chamado.id} atualizado, mas sem equipe técnica.")
             
     return redirect('dashboard_admin_manutencao')
+
+
+def gerenciar_rotinas(request):
+    if request.user.tipo != 'mecanico_admin':
+        messages.error(request, "Acesso restrito a administradores da manutenção.")
+        return redirect('mecanico_dashboard')
+
+    # Dados para a listagem
+    rotinas = RotinaManutencao.objects.all().order_by('proxima_execucao')
+    setores = Setor.objects.all().order_by('nome')
+    
+    # Lógica de Edição: Busca a instância se houver 'edit' na URL
+    edit_id = request.GET.get('edit')
+    instancia = None
+    if edit_id:
+        instancia = get_object_or_404(RotinaManutencao, id=edit_id)
+
+    if request.method == 'POST':
+        form = RotinaManutencaoForm(request.POST, instance=instancia)
+        if form.is_valid():
+            rotina = form.save(commit=False)
+            rotina.criado_por = request.user
+            
+            # Validação Extra: Limpeza de campos baseada no tipo
+            if rotina.tipo == 'setor':
+                rotina.equipamento = None  # Se é setor, não pode ter equipamento
+            elif rotina.tipo == 'equipamento':
+                # O setor da rotina de equipamento pode ser o setor do próprio equipamento
+                if rotina.equipamento and not rotina.setor:
+                    rotina.setor = rotina.equipamento.setor
+            
+            rotina.save()
+            msg = "Rotina atualizada!" if instancia else "Nova rotina criada com sucesso!"
+            messages.success(request, msg)
+            return redirect('gerenciar_rotinas')
+        else:
+            messages.error(request, "Erro ao salvar rotina. Verifique os campos.")
+    else:
+        form = RotinaManutencaoForm(instance=instancia)
+
+    return render(request, 'manutencao/gerenciar_rotinas.html', {
+        'rotinas': rotinas,
+        'setores': setores,
+        'form': form,
+        'editando': bool(instancia)
+    })   
+
+@login_required
+def excluir_rotina(request, rotina_id):
+    if request.user.tipo != 'mecanico_admin':
+        messages.error(request, "Permissão negada.")
+        return redirect('mecanico_dashboard')
+        
+    rotina = get_object_or_404(RotinaManutencao, id=rotina_id)
+    nome = rotina.nome_rotina
+    rotina.delete()
+    
+    messages.success(request, f"Rotina '{nome}' excluída permanentemente.")
+    return redirect('gerenciar_rotinas')
+
 
 @login_required
 def mecanico_dashboard(request):
