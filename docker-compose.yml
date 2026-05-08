@@ -45,7 +45,6 @@ services:
     command: celery -A core worker -l info
     volumes:
       - .:/app
-    env_file: .env
     depends_on:
       - redis
       - db
@@ -56,12 +55,11 @@ services:
     command: celery -A core beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
     volumes:
       - .:/app
-    env_file: .env
     depends_on:
       - redis
       - db
     restart: always
-    
+
 volumes:
   postgres_data:
   media_data: # Criado para salvar as fotos dos chamados
