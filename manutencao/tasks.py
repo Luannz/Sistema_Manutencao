@@ -9,17 +9,25 @@ def verificar_rotinas():
     hoje = timezone.localdate()
     rotinas = RotinaManutencao.objects.filter(ativo=True, proxima_execucao__lte=hoje)
 
-    # Pega o usuário que criou a rotina como solicitante
     for rotina in rotinas:
-        Chamado.objects.create(
-            solicitante=rotina.criado_por,
-            tipo=rotina.tipo if rotina.tipo in ['equipamento', 'avulso'] else 'equipamento',
-            equipamento=rotina.equipamento,
-            setor_avulso=rotina.setor,
-            descricao=f"[ROTINA] {rotina.nome_rotina}\n\n{rotina.descricao}",
-            prioridade=rotina.prioridade,
-            producao_parada=False,
-        )
+        if rotina.tipo == 'setor':
+            Chamado.objects.create(
+                solicitante=rotina.criado_por,
+                tipo='avulso',
+                setor_avulso=rotina.setor,
+                descricao=f"[ROTINA] {rotina.nome_rotina}\n\n{rotina.descricao}",
+                prioridade=rotina.prioridade,
+                producao_parada=False,
+            )
+        else:
+            Chamado.objects.create(
+                solicitante=rotina.criado_por,
+                tipo='equipamento',
+                equipamento=rotina.equipamento,
+                descricao=f"[ROTINA] {rotina.nome_rotina}\n\n{rotina.descricao}",
+                prioridade=rotina.prioridade,
+                producao_parada=False,
+            )
 
         rotina.ultima_execucao = hoje
         rotina.proxima_execucao = calcular_proxima_execucao(rotina, hoje)
