@@ -1,10 +1,13 @@
 from django.apps import AppConfig
+import sys
 
 
 class ManutencaoConfig(AppConfig):
     name = 'manutencao'
 
     def ready(self):
+        if any(cmd in sys.argv for cmd in ['migrate', 'makemigrations', 'collectstatic', 'shell']):
+            return
         self._registrar_schedule_rotinas()
 
     def _registrar_schedule_rotinas(self):
