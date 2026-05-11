@@ -5,25 +5,22 @@ from datetime import timedelta
 
 @shared_task
 def verificar_rotinas():
+    
     hoje = timezone.localdate()
-    rotinas = RotinaManutencao.objects.filter(
-        ativo=True,
-        proxima_execucao__lte=hoje  # vencidas ou que vencem hoje
-    )
+    rotinas = RotinaManutencao.objects.filter(ativo=True, proxima_execucao__lte=hoje)
 
+    # Pega o usuário que criou a rotina como solicitante
     for rotina in rotinas:
-        # Cria o chamado automaticamente
         Chamado.objects.create(
-            titulo=f"[ROTINA] {rotina.nome_rotina}",
-            descricao=rotina.descricao,
+            solicitante=rotina.criado_por,
+            tipo=rotina.tipo if rotina.tipo in ['equipamento', 'avulso'] else 'equipamento',
             equipamento=rotina.equipamento,
-            setor=rotina.setor,
+            setor_avulso=rotina.setor,
+            descricao=f"[ROTINA] {rotina.nome_rotina}\n\n{rotina.descricao}",
             prioridade=rotina.prioridade,
-            origem='rotina',  # se tiver esse campo
-            rotina_origem=rotina,  # se tiver esse campo
+            producao_parada=False,
         )
 
-        # Atualiza as datas da rotina para o próximo ciclo
         rotina.ultima_execucao = hoje
         rotina.proxima_execucao = calcular_proxima_execucao(rotina, hoje)
         rotina.save(update_fields=['ultima_execucao', 'proxima_execucao'])
