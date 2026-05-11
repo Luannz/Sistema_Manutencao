@@ -56,21 +56,21 @@ services:
       - db
     restart: always
 
-celery_beat:
-  build: .
-  pull_policy: never
-  command: celery -A config beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
-  environment:
-    - DB_NAME=${DB_NAME}
-    - DB_USER=${DB_USER}
-    - DB_PASSWORD=${DB_PASSWORD}
-    - DB_HOST=${DB_HOST}
-    - DB_PORT=${DB_PORT}
-    - DEBUG=${DEBUG}
-  depends_on:
-    - redis
-    - db
-  restart: always
+  celery_beat:
+    build: .
+    pull_policy: never
+    command: celery -A config beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    environment:
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DEBUG=${DEBUG}
+    depends_on:
+      - redis
+      - db
+    restart: always
 
 volumes:
   postgres_data:
