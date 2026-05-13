@@ -36,6 +36,14 @@ def logout_view(request):
     return redirect('login')
 
 
+def csrf_failure_view(request, reason=""):
+    # Adiciona a mensagem que o usuário vai ler ao chegar no login
+    messages.warning(request, "Sua sessão expirou por inatividade. Por favor, entre novamente.")
+    
+    # Redireciona para a sua página de login
+    return redirect('login_view') # nome da URL de login
+
+
 @login_required
 def dashboard(request):
     if request.user.tipo in ['mecanico_admin', 'mecanico']:

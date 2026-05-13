@@ -49,6 +49,8 @@ CSRF_TRUSTED_ORIGINS = [
     'http://manutencao.tenislynd.com.br',
 ]
 
+CSRF_FAILURE_VIEW = 'manutencao.views.csrf_failure_view'
+
 
 # Application definition
 
