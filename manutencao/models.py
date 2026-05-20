@@ -184,6 +184,9 @@ class Chamado(models.Model):
     equipamento = models.ForeignKey(Equipamento, on_delete=models.SET_NULL, null=True, blank=True)
     setor_avulso = models.ForeignKey(Setor, on_delete=models.SET_NULL, null=True, blank=True)
     descricao = models.TextField()
+
+    is_rotina = models.BooleanField(default=False, verbose_name="Gerado por Rotina?")
+    rotina_origem = models.ForeignKey(RotinaManutencao, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Rotina de Origem")
     
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pendente')
     prioridade = models.IntegerField(default=3, choices=PRIORIDADE_CHOICES)
