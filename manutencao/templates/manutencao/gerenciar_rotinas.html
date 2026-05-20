@@ -108,6 +108,7 @@
                             <tr>
                                 <th style="width: 40%">Rotina / Alvo</th>
                                 <th>Frequência</th>
+                                <th>Última Execução</th>
                                 <th>Próxima Execução</th>
                                 <th class="text-end px-4">Ações</th>
                             </tr>
@@ -131,6 +132,16 @@
                                     </span>
                                 </td>
                                 <td>
+                                    <div class="small text-secondary">
+                                        <i class="fas fa-history me-1"></i> 
+                                        {% if rotina.ultima_execucao %}
+                                            {{ rotina.ultima_execucao|date:"d/m/Y" }}
+                                        {% else %}
+                                            <span class="text-muted italic">Nunca executada</span>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td>
                                     <div class="small fw-bold {% if rotina.proxima_execucao <= hoje %}text-danger{% else %}text-dark{% endif %}">
                                         <i class="far fa-calendar-alt me-1"></i> {{ rotina.proxima_execucao|date:"d/m/Y" }}
                                     </div>
@@ -147,7 +158,7 @@
                                 </td>
                             </tr>
                             {% empty %}
-                            <tr><td colspan="4" class="text-center py-5 text-muted">Nenhuma rotina cadastrada.</td></tr>
+                            <tr><td colspan="5" class="text-center py-5 text-muted">Nenhuma rotina cadastrada.</td></tr>
                             {% endfor %}
                         </tbody>
                     </table>
