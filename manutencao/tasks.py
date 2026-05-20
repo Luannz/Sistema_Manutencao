@@ -18,6 +18,8 @@ def verificar_rotinas():
                 descricao=f"[ROTINA] {rotina.nome_rotina}\n\n{rotina.descricao}",
                 prioridade=rotina.prioridade,
                 producao_parada=False,
+                rotina_origem=rotina, # novos campos pra identificar que o chamado veio de uma rotina ↓
+                is_rotina=True,
             )
         else:
             Chamado.objects.create(
@@ -27,6 +29,8 @@ def verificar_rotinas():
                 descricao=f"[ROTINA] {rotina.nome_rotina}\n\n{rotina.descricao}",
                 prioridade=rotina.prioridade,
                 producao_parada=False,
+                rotina_origem=rotina, # novos campos pra identificar que o chamado veio de uma rotina ↓
+                is_rotina=True,
             )
 
         rotina.ultima_execucao = hoje
