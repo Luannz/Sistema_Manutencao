@@ -149,7 +149,7 @@ class RotinaManutencao(models.Model):
     frequencia = models.CharField(max_length=20, choices=FREQUENCIA_CHOICES)
     intervalo_dias = models.PositiveIntegerField(null=True, blank=True, help_text="Usado se for personalizado")
     
-    ultima_execucao = models.DateField(auto_now_add=True)
+    ultima_execucao = models.DateField(null=True, blank=True)
     proxima_execucao = models.DateField() # O sistema vai olhar para esta data
     
     ativo = models.BooleanField(default=True)

@@ -133,11 +133,12 @@
                                 </td>
                                 <td>
                                     <div class="small text-secondary">
-                                        <i class="fas fa-history me-1"></i> 
                                         {% if rotina.ultima_execucao %}
-                                            {{ rotina.ultima_execucao|date:"d/m/Y" }}
+                                            <i class="fas fa-history me-1"></i> {{ rotina.ultima_execucao|date:"d/m/Y" }}
                                         {% else %}
-                                            <span class="text-muted italic">Nunca executada</span>
+                                            <span class="badge bg-secondary-subtle text-secondary fw-normal">
+                                                <i class="fas fa-clock me-1"></i> Aguardando 1ª execução
+                                            </span>
                                         {% endif %}
                                     </div>
                                 </td>
