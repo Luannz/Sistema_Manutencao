@@ -167,7 +167,7 @@
 
                 <div class="d-md-none">
                     {% for rotina in rotinas %}
-                    <div class="p-3 border-bottom position-relative">
+                    <div class="p-3 border-bottom position-relative bg-white">
                         <div class="d-flex justify-content-between align-items-start mb-2">
                             <div>
                                 <h6 class="mb-0 fw-bold text-primary">{{ rotina.nome_rotina }}</h6>
@@ -184,18 +184,35 @@
                             </span>
                         </div>
                         
-                        <div class="d-flex justify-content-between align-items-center mt-3">
+                        <div class="d-flex justify-content-between align-items-end mt-3">
                             <div class="small">
-                                <span class="text-muted">Próxima:</span>
-                                <span class="fw-bold {% if rotina.proxima_execucao <= hoje %}text-danger{% endif %}">
-                                    {{ rotina.proxima_execucao|date:"d/m/Y" }}
-                                </span>
+                                <div class="mb-1">
+                                    <span class="text-muted" style="font-size: 0.75rem;">Última:</span>
+                                    <span class="text-secondary" style="font-size: 0.75rem;">
+                                        {% if rotina.ultima_execucao %}
+                                            {{ rotina.ultima_execucao|date:"d/m/Y" }}
+                                        {% else %}
+                                            <span class="opacity-75 italic">Aguardando primeira execução</span>
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                
+                                <div>
+                                    <span class="text-muted">Próxima:</span>
+                                    <span class="fw-bold {% if rotina.proxima_execucao <= hoje %}text-danger{% else %}text-dark{% endif %}">
+                                        {{ rotina.proxima_execucao|date:"d/m/Y" }}
+                                        {% if rotina.proxima_execucao <= hoje %}
+                                            <i class="fas fa-exclamation-circle ms-1"></i>
+                                        {% endif %}
+                                    </span>
+                                </div>
                             </div>
+
                             <div class="d-flex gap-2">
-                                <a href="?edit={{ rotina.id }}" class="btn btn-primary btn-sm px-3">
+                                <a href="?edit={{ rotina.id }}" class="btn btn-primary btn-sm px-3 shadow-sm">
                                     <i class="fas fa-edit"></i>
                                 </a>
-                                <button class="btn btn-outline-danger btn-sm px-3" onclick="confirmarExclusao({{ rotina.id }}, '{{ rotina.nome_rotina }}')">
+                                <button class="btn btn-outline-danger btn-sm px-3 shadow-sm" onclick="confirmarExclusao({{ rotina.id }}, '{{ rotina.nome_rotina }}')">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </div>
