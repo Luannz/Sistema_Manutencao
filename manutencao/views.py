@@ -156,7 +156,7 @@ def atribuir_chamado(request, chamado_id):
             
     return redirect('dashboard_admin_manutencao')
 
-
+@login_required
 def gerenciar_rotinas(request):
     if request.user.tipo != 'mecanico_admin':
         messages.error(request, "Acesso restrito a administradores da manutenção.")
