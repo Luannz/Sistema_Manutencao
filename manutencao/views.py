@@ -251,15 +251,24 @@ def mecanico_dashboard(request):
         uma_semana_atras = datetime.today() - timedelta(days=7)
         chamados_list = chamados_list.filter(criado_em__gte=uma_semana_atras)
 
-    ordem = request.GET.get('ordem', 'ordem_status') # ajustado para respeitar a anotação se não houver ordem
-    if ordem:
-        # Se clicou num filtro específico, respeita a ordenação escolhida (data ou prioridade)
-        chamados_list = chamados_list.order_by(ordem, '-criado_em')
+    # novo filtro de tipo pra pegar o is_rotina e mostrar só os rotinas 
+    tipo_filtro = request.GET.get('tipo_filtro') 
+    if tipo_filtro == 'rotina':
+        chamados_list = chamados_list.filter(is_rotina=True)
+    elif tipo_filtro == 'manual':
+        chamados_list = chamados_list.filter(is_rotina=False)
+
+
+    # 1. Pega a ordem da URL sem dar um valor padrão (default) ainda
+    ordem_selecionada = request.GET.get('ordem')
+
+    base_ordem = ['ordem_status', '-producao_parada','-is_rotina','prioridade', '-criado_em'] # ordem padrão
+    if ordem_selecionada:
+        # Se o usuário clicou em algum filtro de ordenação (ex: data)
+        chamados_list = chamados_list.order_by(*base_ordem, ordem_selecionada, '-criado_em')
     else:
-        # Primeiro por Status (Pendentes e Em Progresso)
-        # Depois por Prioridade (1, 2, 3)
-        # Por fim, os mais recentes dentro desses grupos
-        chamados_list = chamados_list.order_by('ordem_status', 'prioridade', '-criado_em')
+        # Se ele não clicou em nada, usamos a Prioridade como critério seguinte
+        chamados_list = chamados_list.order_by(*base_ordem, 'prioridade', '-criado_em')
 
     # 2. CALCULAR OS TOTAIS ANTES DA PAGINACÃO
     pendentes = chamados_list.filter(status='pendente').count()
@@ -279,8 +288,9 @@ def mecanico_dashboard(request):
         'em_progresso': em_progresso,
         'concluidos': concluidos,
         'status_atual': status_filtro,
-        'ordem_atual': ordem,
+        'ordem_atual': ordem_selecionada,
         'data_atual': data_filtro, 
+        'tipo_atual': tipo_filtro,
     })
 
 

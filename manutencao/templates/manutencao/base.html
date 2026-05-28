@@ -7,6 +7,7 @@
     <title>{% block title %}Lynd | Sistema de Manutenção{% endblock %}</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
     <style>
         :root {
             --nav-dark: #1a233a; 
@@ -204,6 +205,16 @@
         }
         .btn-lg:active {
             transform: scale(0.98);
+        }
+
+        @keyframes doubleFlash {
+        /* Primeira piscada (0% a 10% do tempo) */
+            0%, 10%, 20%, 100% { opacity: 1; }
+            5%, 15% { opacity: 0; }
+        }
+
+        .animate-double-flash {
+            animation: doubleFlash 5s infinite; /* 5 segundos o ciclo total */
         }
     </style>
 </head>
