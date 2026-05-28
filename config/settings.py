@@ -37,6 +37,7 @@ ALLOWED_HOSTS = [
     '192.168.2.5',
     '192.168.2.244',
     'manutencao.tenislynd.com.br',
+    'http://manutencao.tenislynd.com.br',
     '45.228.242.155',
 ]
 
