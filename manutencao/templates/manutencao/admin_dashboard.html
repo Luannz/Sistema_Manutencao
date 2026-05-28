@@ -49,9 +49,9 @@
                                 {% endif %}
                                 <div class="h6 mb-0">
                                     {% if chamado.tipo == 'equipamento' %}
-                                        <strong>{{ chamado.equipamento.nome }}</strong>
+                                        <strong>#{{ chamado.id }} - {{ chamado.equipamento.nome }}</strong>
                                     {% else %}
-                                        <span class="badge bg-light text-dark border">AVULSO</span>
+                                        <span class="badge bg-light text-dark border">#{{ chamado.id }} - AVULSO</span>
                                     {% endif %}
                                 </div>
                                 <small class="text-muted"><i class="fas fa-map-marker-alt me-1"></i>{{ chamado.nome_setor }}</small>
@@ -63,8 +63,15 @@
                             </div>
                         </div>
                         
-                        <div class="bg-light p-2 rounded mb-3">
-                            <small class="d-block text-dark"><strong>Descrição:</strong> {{ chamado.descricao|truncatechars:100 }}</small>
+                        <div class="bg-light p-2 rounded mb-3" 
+                            style="cursor: pointer;" 
+                            onclick="abrirDescricao('{{ chamado.id }}', '{{ chamado.descricao|escapejs }}', '{{ chamado.solicitante.get_full_name|default:chamado.solicitante.username|escapejs }}')">
+                            <small class="d-block text-dark">
+                                <strong>Descrição:</strong> {{ chamado.descricao|truncatechars:100 }}
+                                {% if chamado.descricao|length > 100 %}
+                                    <span class="text-primary fw-bold">... [ver mais]</span>
+                                {% endif %}
+                            </small>
                             <small class="text-muted"><strong>Por:</strong> {{ chamado.solicitante.get_full_name|default:chamado.solicitante.username }}</small>
                         </div>
 
@@ -97,11 +104,17 @@
                                     {% if chamado.producao_parada %}
                                         <span class="badge bg-danger animate__animated animate__flash animate__infinite mb-1">PRODUÇÃO PARADA</span><br>
                                     {% endif %}
-                                    <strong>{{ chamado.equipamento.nome|default:"AVULSO" }}</strong><br>
+                                    <strong>#{{ chamado.id }} - {{ chamado.equipamento.nome|default:"AVULSO" }}</strong><br>
                                     <small class="text-muted">{{ chamado.nome_setor }}</small>
                                 </td>
                                 <td>{{ chamado.solicitante.get_full_name|default:chamado.solicitante.username }}</td>
-                                <td><small>{{ chamado.descricao|truncatewords:10 }}</small></td>
+                                <td style="cursor: pointer;" 
+                                    onclick="abrirDescricao('{{ chamado.id }}', '{{ chamado.descricao|escapejs }}', '{{ chamado.solicitante.get_full_name|default:chamado.solicitante.username|escapejs }}')">
+                                    <small>{{ chamado.descricao|truncatewords:10 }}</small>
+                                    {% if chamado.descricao|length > 50 %}
+                                        <i class="fas fa-search-plus text-primary ms-1" style="font-size: 0.7rem;"></i>
+                                    {% endif %}
+                                </td>
                                 <td>
                                     {% if chamado.prioridade == 1 %}<span class="badge bg-danger">Alta</span>
                                     {% elif chamado.prioridade == 2 %}<span class="badge bg-warning text-dark">Média</span>
@@ -241,5 +254,33 @@ document.querySelectorAll('.select-all').forEach(masterCheck => {
         children.forEach(child => child.checked = this.checked);
     });
 });
+
+function abrirDescricao(id, texto, autor) {
+    document.getElementById('modalDescricaoTitulo').innerText = "Descrição do Chamado #" + id;
+    document.getElementById('modalDescricaoTexto').innerText = texto;
+    document.getElementById('modalDescricaoAutor').innerText = autor;
+    
+    var myModal = new bootstrap.Modal(document.getElementById('modalDescricaoGeral'));
+    myModal.show();
+}
 </script>
+
+<div class="modal fade" id="modalDescricaoGeral" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title text-dark" id="modalDescricaoTitulo">Descrição Completa</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-dark">
+                <p id="modalDescricaoTexto" style="white-space: pre-wrap;"></p>
+                <hr>
+                <small class="text-muted"><strong>Solicitante:</strong> <span id="modalDescricaoAutor"></span></small>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary w-100" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
