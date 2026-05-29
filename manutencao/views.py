@@ -378,10 +378,13 @@ def historico_equipamento(request, equipamento_id):
     
     equipamento = get_object_or_404(Equipamento, id=equipamento_id)
     chamados = Chamado.objects.filter(equipamento=equipamento).order_by('-criado_em')
+    chamado_rotina = chamados.filter(is_rotina=True).first()  # Pega o chamado de rotina mais recente, se existir
+
     
     return render(request, 'manutencao/historico_equipamento.html', {
         'equipamento': equipamento,
-        'chamados': chamados
+        'chamados': chamados,
+        'chamado_rotina': chamado_rotina
     })
 
 @login_required
@@ -392,10 +395,13 @@ def historico_setor(request, setor_id):
     setor = get_object_or_404(Setor, id=setor_id)
     # Filtra apenas chamados do tipo avulso para este setor
     chamados = Chamado.objects.filter(setor_avulso=setor, tipo='avulso').order_by('-criado_em')
+    chamado_rotina = chamados.filter(is_rotina=True).first()  # Pega o chamado de rotina mais recente, se existir
+
     
     return render(request, 'manutencao/historico_setor.html', {
         'setor': setor,
-        'chamados': chamados
+        'chamados': chamados,
+        'chamado_rotina': chamado_rotina
     })
 
 

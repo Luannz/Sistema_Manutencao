@@ -9,6 +9,71 @@
             <i class="fas fa-arrow-left me-1"></i> Voltar
         </a>
 
+        {% if chamado_rotina %}
+            <div class="card mb-4 shadow-sm overflow-hidden" 
+                style="border: 2px dashed #fb923c86 !important; 
+                        border-left: 6px solid {% if chamado_rotina.status == 'concluido' %}#198754{% elif chamado_rotina.status == 'em_progresso' %}#0d6efd{% else %}#ffc107{% endif %} !important; 
+                        background-color: #fffaf5;">
+                
+                <div class="card-header border-0 pt-3 pb-0" style="background-color: transparent;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6 class="text-uppercase fw-bold mb-0" style="letter-spacing: 1px; font-size: 0.75rem; color: #c2410b;">
+                            <i class="fas fa-sync-alt me-1"></i> Última Manutenção de Rotina
+                        </h6>
+                        <span class="badge rounded-pill {% if chamado_rotina.status == 'concluido' %}bg-success{% elif chamado_rotina.status == 'em_progresso' %}bg-primary{% else %}bg-warning text-dark{% endif %}">
+                            {{ chamado_rotina.get_status_display|default:chamado_rotina.status|upper }}
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h5 class="card-title mb-1" style="color: #7c2d12;">#{{ chamado_rotina.id }} — {{ chamado_rotina.criado_em|date:"d/m/Y" }}</h5>
+                            <p class="card-text mb-2" style="font-size: 0.95rem; color: #431407;">
+                                <strong>Descrição:</strong> {{ chamado_rotina.descricao|truncatechars:150 }}
+                            </p>
+                            
+                            {% if chamado_rotina.concluido_por %}
+                            <div class="d-flex align-items-center small fw-bold" style="color: #15803d;">
+                                <i class="fas fa-check-circle me-1"></i>
+                                Concluído por {{ chamado_rotina.concluido_por.get_full_name|default:chamado_rotina.concluido_por.username }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        {% if chamado_rotina.imagens.exists %}
+                        <div class="col-md-4 mt-3 mt-md-0 text-md-end">
+                            <div class="d-flex justify-content-md-end gap-1">
+                                {% for img in chamado_rotina.imagens.all|slice:":3" %}
+                                <a href="{{ img.imagem.url }}" target="_blank">
+                                    <img src="{{ img.imagem.url }}" class="rounded shadow-sm border border-warning" 
+                                        style="width: 55px; height: 55px; object-fit: cover; border-color: #fb923c44 !important;" alt="Preview">
+                                </a>
+                                {% endfor %}
+                                {% if chamado_rotina.imagens.count > 3 %}
+                                <div class="bg-white rounded border d-flex align-items-center justify-content-center small text-muted fw-bold" 
+                                    style="width: 55px; height: 55px; border-color: #fb923c44 !important; color: #c2410b !important;">
+                                    +{{ chamado_rotina.imagens.count|add:"-3" }}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    {% if chamado_rotina.observacoes_mecanico %}
+                    <div class="mt-3 p-2 rounded-3 bg-white border border-warning-subtle shadow-sm">
+                        <small class="d-block text-uppercase fw-bold border-bottom mb-1" style="font-size: 0.65rem; color: #9a3412;">
+                            Relatório do Mecânico:
+                        </small>
+                        <p class="small mb-0" style="color: #431407; font-style: italic;">"{{ chamado_rotina.observacoes_mecanico }}"</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+
         <h4 class="fw-bold text-dark">
             <i class="fas fa-building me-1 text-primary"></i> Infraestrutura: {{ setor.nome }}
         </h4>
