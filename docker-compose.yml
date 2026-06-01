@@ -3,29 +3,25 @@ services:
     image: postgres:15
     container_name: manutencao_db
     restart: always
-    ports:
-      - "5433:5432"
+    # REMOVIDO: ports (Banco protegido internamente)
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:
       - POSTGRES_DB=${DB_NAME}
       - POSTGRES_USER=${DB_USER}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
-  
 
   web:
     build: .
     container_name: manutencao_web
     restart: always
-  
     volumes:
       - media_data:/app/media
     command: >
       sh -c "python manage.py migrate --noinput &&
              python manage.py collectstatic --noinput &&
              gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 5 --threads 3 --worker-class gthread"
-    ports:
-      - "8080:8000"
+    # REMOVIDO: ports (Agora o Nginx entrega o tráfego aqui pela rede interna)
     environment:
       - DB_NAME=${DB_NAME}
       - DB_USER=${DB_USER}
@@ -74,4 +70,4 @@ services:
 
 volumes:
   postgres_data:
-  media_data: # Criado para salvar as fotos dos chamados
+  media_data:
