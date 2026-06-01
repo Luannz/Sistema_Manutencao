@@ -3,26 +3,29 @@ services:
     image: postgres:15
     container_name: manutencao_db
     restart: always
-    # REMOVIDO: ports (Banco de dados trancado e seguro por dentro do Docker)
+    ports:
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:
       - POSTGRES_DB=${DB_NAME}
       - POSTGRES_USER=${DB_USER}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
-    networks:
-      - default
+  
 
   web:
     build: .
-    container_name: manutencao-web
+    container_name: manutencao_web
     restart: always
+  
     volumes:
       - media_data:/app/media
     command: >
       sh -c "python manage.py migrate --noinput &&
              python manage.py collectstatic --noinput &&
              gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 5 --threads 3 --worker-class gthread"
+    ports:
+      - "8080:8000"
     environment:
       - DB_NAME=${DB_NAME}
       - DB_USER=${DB_USER}
@@ -32,15 +35,10 @@ services:
       - DEBUG=${DEBUG}
     depends_on:
       - db
-    networks:
-      - default
-      - rede-nginx
 
   redis:
     image: redis:7-alpine
     restart: always
-    networks:
-      - default  # ADICIONADO: para o Celery e o Django acharem o Redis
 
   celery_worker:
     build: .
@@ -57,8 +55,6 @@ services:
       - redis
       - db
     restart: always
-    networks:
-      - default  # ADICIONADO
 
   celery_beat:
     build: .
@@ -75,15 +71,7 @@ services:
       - redis
       - db
     restart: always
-    networks:
-      - default  # ADICIONADO
 
 volumes:
   postgres_data:
-  media_data:
-
-networks:
-  default:
-  rede-nginx:
-    external: true
-    name: nginx-proxy-manager_default
+  media_data: # Criado para salvar as fotos dos chamados
