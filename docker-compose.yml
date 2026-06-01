@@ -70,6 +70,20 @@ services:
       - db
     restart: always
 
+  # ADICIONADO: O Nginx agora faz parte do ecossistema do sistema
+  nginx-proxy:
+    image: 'jc21/nginx-proxy-manager:latest'
+    container_name: manutencao-nginx
+    restart: always
+    ports:
+      - '80:80'
+      - '81:81'
+    volumes:
+      - ./nginx/data:/data
+      - ./nginx/letsencrypt:/etc/letsencrypt
+    depends_on:
+      - web
+      
 volumes:
   postgres_data:
   media_data: # Criado para salvar as fotos dos chamados
