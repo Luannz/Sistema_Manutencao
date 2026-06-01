@@ -15,15 +15,17 @@ services:
 
   web:
     build: .
-    container_name: manutencao-web  # Sem underline para evitar problemas de DNS interno
+    container_name: manutencao_web
     restart: always
+  
     volumes:
       - media_data:/app/media
     command: >
       sh -c "python manage.py migrate --noinput &&
              python manage.py collectstatic --noinput &&
              gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 5 --threads 3 --worker-class gthread"
-    # IMPORTANTE: Sem a seção "ports". O Nginx já está na mesma rede e vai achar a porta 8000.
+    ports:
+      - "8080:8000"
     environment:
       - DB_NAME=${DB_NAME}
       - DB_USER=${DB_USER}
@@ -70,20 +72,6 @@ services:
       - db
     restart: always
 
-  # ADICIONADO: O Nginx agora faz parte do ecossistema do sistema
-  nginx-proxy:
-    image: 'jc21/nginx-proxy-manager:latest'
-    container_name: manutencao-nginx
-    restart: always
-    ports:
-      - '80:80'
-      - '81:81'
-    volumes:
-      - ./nginx/data:/data
-      - ./nginx/letsencrypt:/etc/letsencrypt
-    depends_on:
-      - web
-      
 volumes:
   postgres_data:
   media_data: # Criado para salvar as fotos dos chamados
