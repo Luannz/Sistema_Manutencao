@@ -15,7 +15,7 @@ services:
 
   web:
     build: .
-    container_name: manutencao_web
+    container_name: manutencao-web
     restart: always
     volumes:
       - media_data:/app/media
@@ -34,7 +34,7 @@ services:
       - db
     networks:
       - default
-      - rede_nginx
+      - rede-nginx
 
   redis:
     image: redis:7-alpine
@@ -84,6 +84,6 @@ volumes:
 
 networks:
   default:
-  rede_nginx:
+  rede-nginx:
     external: true
     name: nginx-proxy-manager_default
