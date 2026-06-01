@@ -212,9 +212,13 @@
                     {% endif %}
                 </div>
 
-                <!-- Descrição resumida -->
-                <p class="card-text text-secondary mt-2" style="font-size: 0.85rem;">
-                    {{ chamado.descricao|truncatewords:12 }}
+                <!-- Descrição resumida e se clicar abre um modal com ela completa-->
+                <p style="cursor: pointer;" 
+                    onclick="abrirDescricao('{{ chamado.id }}', '{{ chamado.descricao|escapejs }}', '{{ chamado.solicitante.get_full_name|default:chamado.solicitante.username|escapejs }}')">
+                    <small>{{ chamado.descricao|truncatewords:10 }}</small>
+                    {% if chamado.descricao|length > 50 %}
+                        <i class="fas fa-search-plus text-primary ms-1" style="font-size: 0.7rem;"></i>
+                    {% endif %}
                 </p>
 
                 <!-- Botão de ação (apenas se não estiver concluído) -->
@@ -272,4 +276,32 @@
     </ul>
 </nav>
 {% endif %}
+<script>
+function abrirDescricao(id, texto, autor) {
+    document.getElementById('modalDescricaoTitulo').innerText = "Descrição do Chamado #" + id;
+    document.getElementById('modalDescricaoTexto').innerText = texto;
+    document.getElementById('modalDescricaoAutor').innerText = autor;
+    
+    var myModal = new bootstrap.Modal(document.getElementById('modalDescricaoGeral'));
+    myModal.show();
+}
+</script>
+<div class="modal fade" id="modalDescricaoGeral" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title text-dark" id="modalDescricaoTitulo">Descrição Completa</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-dark">
+                <p id="modalDescricaoTexto" style="white-space: pre-wrap;"></p>
+                <hr>
+                <small class="text-muted"><strong>Solicitante:</strong> <span id="modalDescricaoAutor"></span></small>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary w-100" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
